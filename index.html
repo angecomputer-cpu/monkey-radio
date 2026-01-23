@@ -5,13 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: black; }
-        .video-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+        /* Forza il contenitore a occupare tutto lo spazio disponibile nell'iframe di Nicepage */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: black; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            /* 'contain' è fondamentale: mantiene le proporzioni di OBS e protegge i tuoi margini laterali */
+            width: 100%;
+            height: 100%;
+            object-fit: contain; 
+            background: black;
+        }
     </style>
 </head>
 <body>
-    <div class="video-wrapper">
+    <div class="video-container">
         <video id="monkeyVideo" autoplay muted playsinline loop>
             <source src="" type="video/mp4">
         </video>
@@ -24,15 +49,11 @@
             const videoElement = document.getElementById('monkeyVideo');
             let videoSrc = "";
 
-            // Organizzazione basata sui tuoi nuovi link
             if (hour >= 6 && hour < 14) {
-                // CERTIFIED
                 videoSrc = "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             } else if (hour >= 14 && hour < 22) {
-                // EVERYDAY
                 videoSrc = "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             } else {
-                // ARCHIVE / TECA (Attivo ora)
                 videoSrc = "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             }
 
@@ -40,12 +61,12 @@
             if (sourceElement.src !== videoSrc) {
                 sourceElement.src = videoSrc;
                 videoElement.load();
-                videoElement.play().catch(e => console.log("Autoplay in attesa di interazione"));
+                videoElement.play().catch(e => console.log("Play in attesa"));
             }
         }
 
         updateVideo();
-        setInterval(updateVideo, 60000); // Controllo ogni minuto
+        setInterval(updateVideo, 60000);
     </script>
 </body>
 </html>
