@@ -3,48 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonkeyStation Player</title>
+    <title>Monkey Radio Player</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-        #monkey-video { width: 100vw; height: 100vh; object-fit: cover; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+        }
+        .video-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            /* 'contain' assicura che si veda tutto il tuo layout OBS con i margini */
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
-    <video id="monkey-video" autoplay loop muted playsinline>
-        <source id="video-source" src="https://archive.org/download/output_everyday_video/output_archive_video.mp4" type="video/mp4">
-    </video>
+    <div class="video-wrapper">
+        <video id="monkeyVideo" autoplay muted playsinline loop>
+            <source src="" type="video/mp4">
+        </video>
+    </div>
 
     <script>
-        function syncMonkey() {
-            const video = document.getElementById('monkey-video');
-            const source = document.getElementById('video-source');
+        function updateVideo() {
             const now = new Date();
-            const options = { timeZone: 'Europe/Rome', hour: 'numeric', hour12: false };
-            const hour = parseInt(new Intl.DateTimeFormat('en-GB', options).format(now));
+            const hour = now.getHours();
+            const videoElement = document.getElementById('monkeyVideo');
+            let videoSrc = "";
 
-            const vids = {
-                teca: "https://archive.org/download/output_everyday_video/output_archive_video.mp4",
-                certified: "https://archive.org/download/output_everyday_video/output_certified_video.mp4",
-                everyday: "https://archive.org/download/output_everyday_video/output_everyday_video.mp4"
-            };
-
-            let selectedSrc = "";
-            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                selectedSrc = vids.teca;
-            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
-                selectedSrc = vids.certified;
+            // Stessa logica del tuo palinsesto
+            if (hour >= 6 && hour < 14) {
+                videoSrc = "CERTIFIED.mp4";
+            } else if (hour >= 14 && hour < 22) {
+                videoSrc = "EVERYDAY.mp4";
             } else {
-                selectedSrc = vids.everyday;
+                videoSrc = "TECA.mp4";
             }
 
-            if (selectedSrc && !source.src.includes(selectedSrc)) {
-                source.src = selectedSrc;
-                video.load();
-                video.play();
+            if (videoElement.getElementsByTagName('source')[0].src.indexOf(videoSrc) === -1) {
+                videoElement.getElementsByTagName('source')[0].src = videoSrc;
+                videoElement.load();
             }
         }
-        syncMonkey();
-        setInterval(syncMonkey, 60000);
+
+        updateVideo();
+        setInterval(updateVideo, 60000); // Controllo ogni minuto
     </script>
 </body>
 </html>
