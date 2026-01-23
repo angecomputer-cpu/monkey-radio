@@ -5,30 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: black;
-        }
-        .video-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        video {
-            /* 'contain' assicura che si veda tutto il tuo layout OBS con i margini */
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: black; }
+        .video-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -45,18 +24,23 @@
             const videoElement = document.getElementById('monkeyVideo');
             let videoSrc = "";
 
-            // Stessa logica del tuo palinsesto
+            // Organizzazione basata sui tuoi nuovi link
             if (hour >= 6 && hour < 14) {
-                videoSrc = "CERTIFIED.mp4";
+                // CERTIFIED
+                videoSrc = "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             } else if (hour >= 14 && hour < 22) {
-                videoSrc = "EVERYDAY.mp4";
+                // EVERYDAY
+                videoSrc = "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             } else {
-                videoSrc = "TECA.mp4";
+                // ARCHIVE / TECA (Attivo ora)
+                videoSrc = "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             }
 
-            if (videoElement.getElementsByTagName('source')[0].src.indexOf(videoSrc) === -1) {
-                videoElement.getElementsByTagName('source')[0].src = videoSrc;
+            const sourceElement = videoElement.getElementsByTagName('source')[0];
+            if (sourceElement.src !== videoSrc) {
+                sourceElement.src = videoSrc;
                 videoElement.load();
+                videoElement.play().catch(e => console.log("Autoplay in attesa di interazione"));
             }
         }
 
