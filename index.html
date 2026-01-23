@@ -3,79 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio - Weekly Schedule System</title>
+    <title>Monkey Radio Player - Stable</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: black; }
-        .video-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        video {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 2s ease-in-out;
-            background: black;
-        }
-        .hidden { opacity: 0; z-index: 1; }
-        .visible { opacity: 1; z-index: 2; }
+        .video-container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        video { width: 100%; height: 100%; object-fit: contain; background: black; }
     </style>
 </head>
 <body>
     <div class="video-container">
-        <video id="video1" class="visible" autoplay muted playsinline loop></video>
-        <video id="video2" class="hidden" autoplay muted playsinline loop></video>
+        <video id="monkeyVideo" autoplay muted playsinline loop>
+            <source src="" type="video/mp4">
+        </video>
     </div>
 
     <script>
-        const v1 = document.getElementById('video1');
-        const v2 = document.getElementById('video2');
-        let currentVideo = v1;
-        let lastUrl = "";
-
         function getTargetSrc() {
             const hour = new Date().getHours();
-            
-            // MAPPA ORARIA PRECISA DAL CALENDARIO
-            if (hour >= 0 && hour < 6) {
-                return "https://archive.org/download/output_everyday_video/output_archive_video.mp4"; 
-            } 
-            else if (hour >= 6 && hour < 9) {
-                return "https://archive.org/download/output_everyday_video/output_certified_video.mp4"; 
-            } 
-            else if (hour >= 9 && hour < 12) {
-                return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4"; 
-            } 
-            else if (hour >= 12 && hour < 14) {
-                return "https://archive.org/download/output_everyday_video/output_archive_video.mp4"; 
-            } 
-            else if (hour >= 14 && hour < 18) {
-                return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4"; 
-            } 
-            else if (hour >= 18 && hour < 21) {
-                return "https://archive.org/download/output_everyday_video/output_certified_video.mp4"; 
-            } 
-            else {
-                return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4"; 
-            }
+            // Palinsesto fedele al tuo calendario
+            if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
+            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
+            if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
+            if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
+            if (hour >= 18 && hour < 21) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        function updateVideo() {
-            const targetSrc = getTargetSrc();
-            if (targetSrc !== lastUrl) {
-                const nextVideo = (currentVideo === v1) ? v2 : v1;
-                nextVideo.src = targetSrc;
-                nextVideo.load();
-                nextVideo.oncanplay = () => {
-                    nextVideo.play();
-                    nextVideo.classList.replace('hidden', 'visible');
-                    currentVideo.classList.replace('visible', 'hidden');
-                    currentVideo = nextVideo;
-                    lastUrl = targetSrc;
-                };
-            }
-        }
+        const videoElement = document.getElementById('monkeyVideo');
+        const sourceElement = videoElement.querySelector('source');
+        let currentSrc = getTargetSrc();
 
-        updateVideo();
-        setInterval(updateVideo, 60000); 
+        // Imposta il video iniziale
+        sourceElement.src = currentSrc;
+        videoElement.load();
+
+        // Controlla il cambio ora ogni minuto, ma cambia SOLO se serve
+        setInterval(() => {
+            const newSrc = getTargetSrc();
+            if (newSrc !== currentSrc) {
+                currentSrc = newSrc;
+                sourceElement.src = currentSrc;
+                videoElement.load();
+                videoElement.play();
+            }
+        }, 60000);
     </script>
 </body>
 </html>
