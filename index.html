@@ -5,25 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player - Stable</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: black; }
-        .video-container { 
-            width: 100vw; 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            background: black;
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background-color: black; 
         }
-        video { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* Nasconde i controlli nativi */
-        video::-webkit-media-controls { display:none !important; }
+        /* Il container DEVE avere uno sfondo nero per il fullscreen */
+        #fullscreen-root {
+            width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background: black; cursor: pointer;
+        }
+        video { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div class="video-container" id="main-container">
+    <div id="fullscreen-root">
         <video id="monkeyVideo" autoplay muted playsinline loop>
             <source src="" type="video/mp4">
         </video>
@@ -31,7 +28,7 @@
 
     <script>
         const video = document.getElementById('monkeyVideo');
-        const container = document.getElementById('main-container');
+        const root = document.getElementById('fullscreen-root');
 
         function getTargetSrc() {
             const hour = new Date().getHours();
@@ -44,37 +41,32 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        // FUNZIONE FULLSCREEN DEFINITIVA
-        function launchFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-                // ENTRA
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                } else if (video.mozRequestFullScreen) {
-                    video.mozRequestFullScreen();
-                } else if (video.msRequestFullscreen) {
-                    video.msRequestFullscreen();
-                } else if (video.webkitEnterFullscreen) {
-                    video.webkitEnterFullscreen(); // Specifico iOS
-                }
+        // FUNZIONE ATOMICA PER IL FULLSCREEN
+        function toggleFS() {
+            // Controlliamo se siamo già in fullscreen (metodo universale)
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+            if (!isFS) {
+                // PROVA AD ENTRARE
+                const el = document.documentElement; // Chiediamo a TUTTA la pagina
+                if (el.requestFullscreen) el.requestFullscreen();
+                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+                else if (el.msRequestFullscreen) el.msRequestFullscreen();
             } else {
-                // ESCI
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                // PROVA AD USCIRE
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
             }
         }
 
-        // Listener sul click/tocco
-        container.addEventListener('click', launchFullscreen);
+        // Applichiamo il listener sia per mouse che per touch
+        root.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleFS();
+        });
 
         // Impostazione Video
         const source = video.querySelector('source');
