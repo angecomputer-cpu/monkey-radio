@@ -2,79 +2,70 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player - Stable</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background-color: black; 
+            background-color: #000 !important; 
+            overflow: hidden; 
         }
-        
-        #main-container {
-            width: 100vw; height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            background: black; position: relative;
+        .video-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
         }
-
-        /* Forza il video a riempire sempre lo spazio, eliminando i bordi del video player nativo */
-        video { 
-            width: 100% !important; 
-            height: 100% !important; 
+        video {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            background: black;
+            background: #000;
         }
-
-        /* Pseudo-classe per quando l'elemento è in fullscreen */
-        #main-container:fullscreen video { object-fit: contain; }
-        #main-container:-webkit-full-screen video { object-fit: contain; }
-
         #fs-btn {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 30px; height: 30px;
-            background: rgba(0, 0, 0, 0.6); 
-            border: 1px solid #ffcc00;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 999;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0.7;
-        }
-        
-        .fs-icon {
-            width: 12px; height: 12px;
+            width: 35px; 
+            height: 35px;
+            background: rgba(0, 0, 0, 0.7); 
             border: 2px solid #ffcc00;
-            box-sizing: border-box;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        /* Nasconde controlli nativi ovunque */
+        .fs-icon {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffcc00;
+        }
         video::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
 
-    <div id="main-container">
-        <video id="monkeyVideo" autoplay muted playsinline loop>
-            <source src="" type="video/mp4">
-        </video>
+    <div class="video-wrapper">
+        <video id="monkeyVideo" autoplay muted playsinline loop></video>
         
-        <div id="fs-btn" onclick="toggleFS()">
+        <div id="fs-btn" onclick="toggleFullscreen()">
             <div class="fs-icon"></div>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('monkeyVideo');
-        const container = document.getElementById('main-container');
 
         function getRomeHour() {
-            const now = new Date();
-            const formatter = new Intl.DateTimeFormat('it-IT', {
+            return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
-            });
-            return parseInt(formatter.format(now));
+            }).format(new Date()));
         }
 
         function getTargetSrc() {
@@ -88,49 +79,50 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        function toggleFS() {
-            const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        // FUNZIONE DI CARICAMENTO FORZATO
+        function initVideo() {
+            const src = getTargetSrc();
+            video.src = src;
+            video.load();
+            video.play().catch(err => console.log("Autoplay in attesa di interazione"));
+        }
 
-            if (!isFS) {
-                // CHIEDIAMO IL FULLSCREEN AL CONTAINER, NON AL VIDEO
-                const requestFS = container.requestFullscreen || container.webkitRequestFullscreen || container.mozRequestFullScreen || container.msRequestFullscreen;
-                
-                if (requestFS) {
-                    requestFS.call(container).catch(err => {
-                        // Fallback per iOS se il container fallisce
-                        if(video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-                    });
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) {
+                    video.webkitEnterFullscreen();
                 }
             } else {
-                const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-                if (exitFS) exitFS.call(document);
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
             }
         }
 
-        const syncUI = () => {
-            const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-            document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
-            // Forza il ricalcolo delle dimensioni
-            window.dispatchEvent(new Event('resize'));
-        };
+        // Avvio immediato al caricamento della pagina
+        window.onload = initVideo;
 
-        document.addEventListener('fullscreenchange', syncUI);
-        document.addEventListener('webkitfullscreenchange', syncUI);
-
-        const source = video.querySelector('source');
-        let currentSrc = getTargetSrc();
-        source.src = currentSrc;
-        video.load();
-
+        // Controllo cambio fascia oraria ogni minuto
         setInterval(() => {
-            const newSrc = getTargetSrc();
-            if (newSrc !== currentSrc) {
-                currentSrc = newSrc;
-                source.src = currentSrc;
-                video.load();
-                video.play();
+            const currentHourSrc = getTargetSrc();
+            // Verifichiamo se l'URL deve cambiare (usiamo decodeURI per evitare problemi con i caratteri speciali)
+            if (decodeURI(video.src) !== decodeURI(currentHourSrc)) {
+                initVideo();
             }
         }, 60000);
+
+        const handleFSChange = () => {
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+            document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
+        };
+        document.addEventListener('fullscreenchange', handleFSChange);
+        document.addEventListener('webkitfullscreenchange', handleFSChange);
     </script>
 </body>
 </html>
