@@ -2,23 +2,31 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monkey Radio Player - Stable</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             overflow: hidden; background-color: black; 
         }
-        .video-container { 
-            width: 100vw; height: 100vh; 
-            display: flex; align-items: center; justify-content: center; 
+        
+        #main-container {
+            width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
             background: black; position: relative;
         }
+
+        /* Forza il video a riempire sempre lo spazio, eliminando i bordi del video player nativo */
         video { 
-            width: 100%; height: 100%; 
-            object-fit: contain; 
+            width: 100% !important; 
+            height: 100% !important; 
+            object-fit: contain;
             background: black;
         }
+
+        /* Pseudo-classe per quando l'elemento è in fullscreen */
+        #main-container:fullscreen video { object-fit: contain; }
+        #main-container:-webkit-full-screen video { object-fit: contain; }
 
         #fs-btn {
             position: absolute;
@@ -26,14 +34,13 @@
             left: 50%;
             transform: translateX(-50%);
             width: 30px; height: 30px;
-            background: rgba(0, 0, 0, 0.5); 
+            background: rgba(0, 0, 0, 0.6); 
             border: 1px solid #ffcc00;
             border-radius: 4px;
             cursor: pointer;
-            z-index: 100;
+            z-index: 999;
             display: flex; align-items: center; justify-content: center;
-            opacity: 0.6;
-            transition: opacity 0.3s;
+            opacity: 0.7;
         }
         
         .fs-icon {
@@ -41,11 +48,14 @@
             border: 2px solid #ffcc00;
             box-sizing: border-box;
         }
+
+        /* Nasconde controlli nativi ovunque */
+        video::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
 
-    <div class="video-container">
+    <div id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop>
             <source src="" type="video/mp4">
         </video>
@@ -57,6 +67,7 @@
 
     <script>
         const video = document.getElementById('monkeyVideo');
+        const container = document.getElementById('main-container');
 
         function getRomeHour() {
             const now = new Date();
@@ -77,25 +88,18 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        async function toggleFS() {
+        function toggleFS() {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 
             if (!isFS) {
-                // CHIEDIAMO IL FULLSCREEN AL VIDEO DIRETTAMENTE
-                const requestFS = video.requestFullscreen || video.webkitRequestFullscreen || video.mozRequestFullScreen || video.msRequestFullscreen || video.webkitEnterFullscreen;
+                // CHIEDIAMO IL FULLSCREEN AL CONTAINER, NON AL VIDEO
+                const requestFS = container.requestFullscreen || container.webkitRequestFullscreen || container.mozRequestFullScreen || container.msRequestFullscreen;
                 
                 if (requestFS) {
-                    try {
-                        await requestFS.call(video);
-                        // Tentiamo la rotazione dopo un piccolo delay per far respirare Android
-                        setTimeout(async () => {
-                            if (screen.orientation && screen.orientation.lock) {
-                                await screen.orientation.lock('landscape').catch(() => {});
-                            }
-                        }, 200);
-                    } catch (err) {
-                        console.log("Errore: ", err);
-                    }
+                    requestFS.call(container).catch(err => {
+                        // Fallback per iOS se il container fallisce
+                        if(video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+                    });
                 }
             } else {
                 const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
@@ -103,10 +107,11 @@
             }
         }
 
-        // Se il video va in fullscreen nativo, il bottone deve sparire
         const syncUI = () => {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
             document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
+            // Forza il ricalcolo delle dimensioni
+            window.dispatchEvent(new Event('resize'));
         };
 
         document.addEventListener('fullscreenchange', syncUI);
