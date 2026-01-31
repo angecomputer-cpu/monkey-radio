@@ -2,59 +2,56 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monkey Radio Player - Stable</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            background-color: #000 !important; 
-            overflow: hidden; 
+            overflow: hidden; background-color: black; 
         }
-        .video-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
+        .video-container { 
+            width: 100vw; height: 100vh; 
+            display: flex; align-items: center; justify-content: center; 
+            background: black; position: relative;
         }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
+        video { 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            background: black;
         }
+
+        /* TASTO FULLSCREEN CENTRATO IN BASSO (20PX UP) */
         #fs-btn {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 35px; 
-            height: 35px;
+            width: 35px; height: 35px;
             background: rgba(0, 0, 0, 0.7); 
             border: 2px solid #ffcc00;
             border-radius: 6px;
             cursor: pointer;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 999;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.8;
+            transition: opacity 0.3s;
         }
+        
         .fs-icon {
-            width: 14px;
-            height: 14px;
+            width: 14px; height: 14px;
             border: 2px solid #ffcc00;
+            box-sizing: border-box;
         }
+
         video::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
 
-    <div class="video-wrapper">
+    <div class="video-container" id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop></video>
         
-        <div id="fs-btn" onclick="toggleFullscreen()">
+        <div id="fs-btn" onclick="toggleFS()">
             <div class="fs-icon"></div>
         </div>
     </div>
@@ -62,6 +59,7 @@
     <script>
         const video = document.getElementById('monkeyVideo');
 
+        // FUNZIONE ORA DI ROMA (Centralizzata)
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
@@ -70,6 +68,7 @@
 
         function getTargetSrc() {
             const hour = getRomeHour();
+            // Percorsi recuperati dal tuo file originale
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
@@ -79,50 +78,52 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        // FUNZIONE DI CARICAMENTO FORZATO
-        function initVideo() {
+        // Funzione di caricamento immediato
+        function loadMonkeyVideo() {
             const src = getTargetSrc();
-            video.src = src;
-            video.load();
-            video.play().catch(err => console.log("Autoplay in attesa di interazione"));
+            if (video.src !== src) {
+                video.src = src;
+                video.load();
+                video.play().catch(() => {
+                    console.log("Autoplay in attesa di interazione");
+                });
+            }
         }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                } else if (video.webkitEnterFullscreen) {
+        // Gestione Fullscreen ottimizzata per Pixel 6 e PC
+        function toggleFS() {
+            const container = document.getElementById('main-container');
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+
+            if (!isFS) {
+                // Su mobile usiamo webkitEnterFullscreen (più solido per i driver video Android)
+                // Su PC usiamo il requestFullscreen standard sul container
+                if (video.webkitEnterFullscreen) {
                     video.webkitEnterFullscreen();
+                } else {
+                    const requestFS = container.requestFullscreen || container.webkitRequestFullscreen || container.mozRequestFullScreen || container.msRequestFullscreen;
+                    if (requestFS) requestFS.call(container);
                 }
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
+                const exitFS = document.exitFullscreen || document.webkitExitFullscreen;
+                if (exitFS) exitFS.call(document);
             }
         }
 
-        // Avvio immediato al caricamento della pagina
-        window.onload = initVideo;
+        // Inizializzazione al caricamento
+        loadMonkeyVideo();
 
-        // Controllo cambio fascia oraria ogni minuto
-        setInterval(() => {
-            const currentHourSrc = getTargetSrc();
-            // Verifichiamo se l'URL deve cambiare (usiamo decodeURI per evitare problemi con i caratteri speciali)
-            if (decodeURI(video.src) !== decodeURI(currentHourSrc)) {
-                initVideo();
-            }
-        }, 60000);
+        // Controllo palinsesto ogni 60 secondi
+        setInterval(loadMonkeyVideo, 60000);
 
-        const handleFSChange = () => {
+        // Nasconde/Mostra il tasto quando si cambia stato fullscreen
+        const syncUI = () => {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
             document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
         };
-        document.addEventListener('fullscreenchange', handleFSChange);
-        document.addEventListener('webkitfullscreenchange', handleFSChange);
+
+        document.addEventListener('fullscreenchange', syncUI);
+        document.addEventListener('webkitfullscreenchange', syncUI);
     </script>
 </body>
 </html>
