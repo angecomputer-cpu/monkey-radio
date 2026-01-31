@@ -14,7 +14,11 @@
             display: flex; align-items: center; justify-content: center; 
             background: black; position: relative;
         }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video { 
+            width: 100%; height: 100%; 
+            object-fit: contain; /* Mantiene le proporzioni senza tagliare */
+            display: block;
+        }
 
         /* TASTO FULLSCREEN */
         #fs-btn {
@@ -33,7 +37,11 @@
             align-items: center;
             justify-content: center;
             opacity: 0.6;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s, transform 0.2s;
+        }
+        #fs-btn:hover { 
+            opacity: 1; 
+            transform: translateX(-50%) scale(1.1);
         }
         
         .fs-icon {
@@ -48,7 +56,7 @@
 </head>
 <body>
 
-    <div class="video-container">
+    <div class="video-container" id="container">
         <video id="monkeyVideo" autoplay muted playsinline loop>
             <source src="" type="video/mp4">
         </video>
@@ -60,7 +68,9 @@
 
     <script>
         const video = document.getElementById('monkeyVideo');
+        const container = document.getElementById('container');
 
+        // Sincronizzazione ora di Roma
         function getRomeHour() {
             const now = new Date();
             const formatter = new Intl.DateTimeFormat('it-IT', {
@@ -74,42 +84,62 @@
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
-            if (hour >= 12 && hour < 14) return "https://archive.org/download/output_archive_video.mp4";
+            if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             if (hour >= 18 && hour < 21) return "https://archive.org/download/output_certified_video.mp4";
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        function toggleFS() {
+        async function toggleFS() {
             const doc = document.documentElement;
             const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 
             if (!isFS) {
-                // Tentativo di entrata
                 const requestFS = doc.requestFullscreen || doc.webkitRequestFullscreen || doc.mozRequestFullScreen || doc.msRequestFullscreen;
                 if (requestFS) {
-                    requestFS.call(doc).catch(err => {
-                        alert("Errore: L'iframe blocca il Fullscreen. Aggiungi 'allowfullscreen' al tag iframe su Nicepage.");
-                    });
+                    try {
+                        await requestFS.call(doc);
+                        if (screen.orientation && screen.orientation.lock) {
+                            await screen.orientation.lock('landscape').catch(() => {});
+                        }
+                    } catch (err) {
+                        console.log("Errore Fullscreen: ", err);
+                    }
                 }
             } else {
-                // Uscita
                 const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-                if (exitFS) exitFS.call(document);
+                if (exitFS) {
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                    exitFS.call(document);
+                }
             }
         }
 
-        // Gestione visibilità tasto basata sull'evento reale
-        const updateBtnVisibility = () => {
+        // GESTIONE ROTAZIONE E RESIZE
+        function handleResize() {
+            // Forza il container a riprendere le dimensioni della finestra
+            container.style.width = window.innerWidth + 'px';
+            container.style.height = window.innerHeight + 'px';
+            // Assicura che il video venga ridisegnato correttamente
+            video.style.width = '100%';
+            video.style.height = '100%';
+        }
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+
+        const updateUI = () => {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
             document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
+            handleResize(); // Ri-adatta tutto quando cambia lo stato
         };
 
-        document.addEventListener('fullscreenchange', updateBtnVisibility);
-        document.addEventListener('webkitfullscreenchange', updateBtnVisibility);
-        document.addEventListener('mozfullscreenchange', updateBtnVisibility);
-        document.addEventListener('MSFullscreenChange', updateBtnVisibility);
+        document.addEventListener('fullscreenchange', updateUI);
+        document.addEventListener('webkitfullscreenchange', updateUI);
 
+        // Setup iniziale video
         const source = video.querySelector('source');
         let currentSrc = getTargetSrc();
         source.src = currentSrc;
@@ -124,6 +154,9 @@
                 video.play();
             }
         }, 60000);
+
+        // Esegui handleResize al caricamento per sicurezza
+        handleResize();
     </script>
 </body>
 </html>
