@@ -6,23 +6,32 @@
     <title>Monkey Radio Player - Stable</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: black; }
-        .video-container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        video { width: 100%; height: 100%; object-fit: contain; background: black; }
+        .video-container { 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            background: black;
+        }
+        video { width: 100%; height: 100%; object-fit: contain; }
         
-        /* Rimuove i controlli nativi che appaiono a volte su mobile in fullscreen */
+        /* Nasconde i controlli nativi */
         video::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
-    <div class="video-container" onclick="toggleFullscreen()">
+
+    <div class="video-container" id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop>
             <source src="" type="video/mp4">
         </video>
     </div>
 
     <script>
-        const videoElement = document.getElementById('monkeyVideo');
-        const container = document.querySelector('.video-container');
+        const video = document.getElementById('monkeyVideo');
+        const container = document.getElementById('main-container');
 
         function getTargetSrc() {
             const hour = new Date().getHours();
@@ -31,52 +40,56 @@
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
-            if (hour >= 18 && hour < 21) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            if (hour >= 18 && hour < 21) return "https://archive.org/download/output_certified_video.mp4";
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        // Funzione Fullscreen Adattabile
-        function toggleFullscreen() {
-            if (!document.fullscreenElement &&    // Standard
-                !document.webkitFullscreenElement && // Chrome/Safari
-                !document.msFullscreenElement) {    // IE/Edge
-                
-                // Entra in Fullscreen
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
-                } else if (videoElement.webkitEnterFullscreen) {
-                    // Supporto specifico per iPhone
-                    videoElement.webkitEnterFullscreen();
+        // FUNZIONE FULLSCREEN DEFINITIVA
+        function launchFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                // ENTRA
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    video.mozRequestFullScreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) {
+                    video.webkitEnterFullscreen(); // Specifico iOS
                 }
             } else {
-                // Esci dal Fullscreen
+                // ESCI
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
             }
         }
 
-        // Gestione Palinsesto
-        const sourceElement = videoElement.querySelector('source');
-        let currentSrc = getTargetSrc();
-        sourceElement.src = currentSrc;
-        videoElement.load();
+        // Listener sul click/tocco
+        container.addEventListener('click', launchFullscreen);
 
+        // Impostazione Video
+        const source = video.querySelector('source');
+        let currentSrc = getTargetSrc();
+        source.src = currentSrc;
+        video.load();
+
+        // Controllo palinsesto ogni minuto
         setInterval(() => {
             const newSrc = getTargetSrc();
             if (newSrc !== currentSrc) {
                 currentSrc = newSrc;
-                sourceElement.src = currentSrc;
-                videoElement.load();
-                videoElement.play();
+                source.src = currentSrc;
+                video.load();
+                video.play();
             }
         }, 60000);
     </script>
