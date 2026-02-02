@@ -2,31 +2,35 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player - Stable</title>
     <style>
-        /* RESET BASE */
+        /* RESET AMBIENTALE */
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background-color: black; 
+            background-color: #000; 
+            overflow: hidden; /* Blocca scorrimento indesiderato */
         }
         
-        /* IL CONTENITORE CHE DIVENTA FULLSCREEN */
+        /* CONTENITORE BLINDATO */
         .video-container { 
             width: 100vw; height: 100vh; 
             display: flex; align-items: center; justify-content: center; 
-            background: black; position: relative;
+            background: #000; 
+            position: relative;
         }
 
-        /* STILE VIDEO */
+        /* VIDEO CON ACCELERAZIONE HARDWARE */
         video { 
             width: 100%; height: 100%; 
             object-fit: contain; 
-            background: black;
-            display: block;
+            background: #000;
+            /* Trucco per forzare il rendering su Android ed evitare lo schermo nero */
+            transform: translateZ(0); 
+            will-change: transform;
         }
 
-        /* STILE TASTO GIALLO (Sempre sopra a tutto) */
+        /* TASTO GIALLO - PRIORITY LEVEL MAX */
         #fs-btn {
             position: absolute;
             bottom: 20px;
@@ -37,22 +41,27 @@
             border: 2px solid #ffcc00;
             border-radius: 6px;
             cursor: pointer;
-            z-index: 2147483647; /* Z-index massimo per restare visibile in fullscreen */
+            z-index: 2147483647; /* Sopra a tutto, sempre */
             display: flex; align-items: center; justify-content: center;
         }
         
         .fs-icon { 
             width: 14px; height: 14px; 
             border: 2px solid #ffcc00; 
-            box-sizing: border-box; 
         }
 
-        /* NASCONDE I CONTROLLI NATIVI SEMPRE */
+        /* CSS SPECIFICO PER FULLSCREEN: MASC HERA TUTTO IL RESTO */
+        .video-container:fullscreen {
+            background-color: black;
+            width: 100vw; height: 100vh;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        /* Nasconde controlli nativi */
         video::-webkit-media-controls { display:none !important; }
-
-        /* FIX PER PC: Quando è in fullscreen, sfondo nero assoluto */
-        .video-container:fullscreen { background-color: black; width: 100vw; height: 100vh; }
-        .video-container:-webkit-full-screen { background-color: black; width: 100%; height: 100%; }
+        
+        /* Sfondo nero assoluto dietro il fullscreen */
         ::backdrop { background-color: black; }
     </style>
 </head>
@@ -61,7 +70,7 @@
     <div class="video-container" id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop></video>
         
-        <div id="fs-btn" onclick="toggleCustomFullscreen()">
+        <div id="fs-btn" onclick="executeRotationLogic()">
             <div class="fs-icon"></div>
         </div>
     </div>
@@ -70,13 +79,14 @@
         const video = document.getElementById('monkeyVideo');
         const container = document.getElementById('main-container');
 
-        // FUSO ORARIO ROMA
+        // 1. FUSO ORARIO ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
             }).format(new Date()));
         }
 
+        // 2. PALINSESTO
         function getTargetSrc() {
             const hour = getRomeHour();
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
@@ -88,81 +98,91 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        // CARICAMENTO VIDEO (Metodo stabile diretto)
+        // 3. CARICAMENTO SOLIDO
         function initPlayer() {
             const src = getTargetSrc();
             if (video.src !== src) {
                 video.src = src;
                 video.load();
-                video.play().catch(e => console.log("Autoplay attesa input"));
+                video.play().catch(() => {});
             }
         }
 
-        // LOGICA FULLSCREEN IBRIDA
-        function toggleCustomFullscreen() {
+        // 4. LA TUA LOGICA: ROTAZIONE PRIMA, POI FULLSCREEN
+        async function executeRotationLogic() {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
 
             if (!isFS) {
-                // Entra in Fullscreen sul CONTAINER (così il tasto giallo resta)
+                // TENTATIVO 1: Chiediamo la rotazione PRIMA di tutto (come volevi tu)
+                // Su molti browser fallirà silenziosamente, ma su alcuni prepara il driver video
+                try {
+                    if (screen.orientation && screen.orientation.lock) {
+                        // Non aspettiamo (await) che finisca, lanciamo e corriamo
+                        screen.orientation.lock('landscape').catch(() => {});
+                    }
+                } catch (e) {}
+
+                // TENTATIVO 2: Lanciamo il fullscreen immediatamente dopo
                 if (container.requestFullscreen) {
-                    container.requestFullscreen();
+                    await container.requestFullscreen();
                 } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
+                    await container.webkitRequestFullscreen();
                 } else if (video.webkitEnterFullscreen) {
-                    // Fallback estremo per iOS (solo video, niente tasto giallo lì, ma funziona)
-                    video.webkitEnterFullscreen();
+                    video.webkitEnterFullscreen(); // Fallback iOS
                 }
+
+                // TENTATIVO 3: Una volta entrati (o mentre stiamo entrando), BLOCCIAMO di nuovo
+                // Questo è il colpo di grazia che funziona perché ora siamo in fullscreen
+                setTimeout(() => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {});
+                    }
+                }, 200);
+
             } else {
-                // Esci
+                // USCITA
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
                 }
+                // Sblocchiamo la rotazione uscendo
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
             }
         }
 
-        // ANTI-BUG GRAFICO (Pixel 6 Fix)
-        // Forza il browser a ridisegnare il video se si "incanta" durante la rotazione
-        function forceRepaint() {
+        // 5. ANTI-BLACK SCREEN (Rendering Fix)
+        // Se il video sparisce ruotando, questo lo forza a ridisegnarsi
+        function forceRender() {
             video.style.display = 'none';
-            video.offsetHeight; // Trigger reflow
+            // Leggere una proprietà forza il browser a ricalcolare il layout
+            video.offsetHeight; 
             video.style.display = 'block';
         }
 
-        // ASCOLTATORI EVENTI
         window.addEventListener('orientationchange', () => {
-            // Piccolo delay per dare tempo ad Android di girare la visuale
-            setTimeout(forceRepaint, 100);
+            // Aspettiamo che la rotazione fisica finisca e forziamo il refresh
+            setTimeout(forceRender, 300);
         });
 
-        // GESTIONE UI TASTO
-        const syncUI = () => {
-            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-            // Nel container fullscreen il tasto RESTA visibile, ma cambiamo icona se volessimo
-            // Se preferisci che sparisca e riappaia solo al tocco, dimmelo.
-            // Per ora lo lascio fisso per permettere l'uscita.
-            
-            // Fix per PC: Assicura che il video riempia lo schermo nero
-            if (isFS) {
-                video.style.width = "100vw";
-                video.style.height = "100vh";
-            } else {
-                video.style.width = "100%";
-                video.style.height = "100%";
-            }
-        };
-
-        document.addEventListener('fullscreenchange', syncUI);
-        document.addEventListener('webkitfullscreenchange', syncUI);
-
-        // AVVIO
+        // Avvio
         initPlayer();
         setInterval(() => {
-            const currentSrc = getTargetSrc();
-            // Controllo semplificato per evitare ricaricamenti inutili
-            if (video.src !== currentSrc) initPlayer();
+            if (video.src !== getTargetSrc()) initPlayer();
         }, 60000);
+
+        // UI Management
+        const syncUI = () => {
+             // Fix PC: Assicura che in fullscreen lo sfondo sia nero
+             const isFS = document.fullscreenElement;
+             if(isFS) {
+                 container.style.backgroundColor = "black";
+                 video.style.width = "100vw";
+             }
+        };
+        document.addEventListener('fullscreenchange', syncUI);
     </script>
 </body>
 </html>
