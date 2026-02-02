@@ -9,7 +9,6 @@
         .video-container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
         video { width: 100%; height: 100%; object-fit: contain; background: black; }
         
-        /* Tasto Fullscreen visibile ma discreto */
         #fs-btn {
             position: absolute;
             bottom: 20px;
@@ -24,21 +23,27 @@
             display: flex; align-items: center; justify-content: center;
         }
         .fs-icon { width: 14px; height: 14px; border: 2px solid #ffcc00; box-sizing: border-box; }
-        video::-webkit-media-controls { display:none !important; }
+        
+        /* Nasconde i controlli quando NON è in fullscreen */
+        video:not(:fullscreen)::-webkit-media-controls { display:none !important; }
+        video:not(:-webkit-full-screen)::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
     <div class="video-container">
-        <video id="monkeyVideo" autoplay muted playsinline loop></video>
-        <div id="fs-btn" onclick="launchFullscreen()">
+        <video id="monkeyVideo" autoplay muted playsinline loop>
+            <source id="videoSource" src="" type="video/mp4">
+        </video>
+        
+        <div id="fs-btn" onclick="goNativeFS()">
             <div class="fs-icon"></div>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('monkeyVideo');
+        const source = document.getElementById('videoSource');
 
-        // FUNZIONE FUSO ORARIO ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
@@ -47,7 +52,6 @@
 
         function getTargetSrc() {
             const hour = getRomeHour();
-            // Percorsi video dal tuo originale
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
@@ -57,45 +61,47 @@
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
-        // CARICAMENTO INIZIALE DIRETTO
-        function initPlayer() {
-            const src = getTargetSrc();
-            video.src = src;
-            video.load();
-            video.play().catch(() => console.log("Interazione richiesta per Play"));
+        function updateSource() {
+            const newSrc = getTargetSrc();
+            if (source.src !== newSrc) {
+                source.src = newSrc;
+                video.load();
+                video.play().catch(() => {});
+            }
         }
 
-        // FULLSCREEN ROBUSTO PER IFRAME E PIXEL 6
-        function launchFullscreen() {
-            // Su mobile (Android/iOS), chiediamo il fullscreen direttamente al video.
-            // Questo forza il sistema a usare il suo player nativo che ruota senza bug.
-            if (video.webkitEnterFullscreen) {
-                video.webkitEnterFullscreen();
-            } else if (video.requestFullscreen) {
+        // LA SVOLTA: Usiamo il comando più "primitivo" e potente disponibile
+        function goNativeFS() {
+            // Abilitiamo i controlli nativi un istante prima di entrare
+            // Questo permette ad Android di mostrare l'icona "ruota" o di gestire la rotazione da solo
+            video.controls = true; 
+
+            if (video.requestFullscreen) {
                 video.requestFullscreen();
+            } else if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
             } else if (video.webkitRequestFullscreen) {
                 video.webkitRequestFullscreen();
             }
         }
 
-        // Avvio
-        initPlayer();
-
-        // Controllo palinsesto ogni minuto
-        setInterval(() => {
-            const currentHourSrc = getTargetSrc();
-            if (video.src !== currentHourSrc) {
-                initPlayer();
-            }
-        }, 60000);
-
-        // Gestione visibilità tasto
-        const syncUI = () => {
+        // Quando si esce dal fullscreen, togliamo i controlli per tornare al look pulito Monkey
+        const cleanUI = () => {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-            document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
+            if (!isFS) {
+                video.controls = false;
+                document.getElementById('fs-btn').style.display = "flex";
+            } else {
+                document.getElementById('fs-btn').style.display = "none";
+            }
         };
-        document.addEventListener('fullscreenchange', syncUI);
-        document.addEventListener('webkitfullscreenchange', syncUI);
+
+        document.addEventListener('fullscreenchange', cleanUI);
+        document.addEventListener('webkitfullscreenchange', cleanUI);
+
+        // Avvio
+        updateSource();
+        setInterval(updateSource, 60000);
     </script>
 </body>
 </html>
