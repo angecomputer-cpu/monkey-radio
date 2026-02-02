@@ -18,37 +18,44 @@
             width: 100%; height: 100%; 
             object-fit: contain; 
             background: black;
+            transition: all 0.3s ease;
         }
 
-        /* TASTO MONKEY - VISIBILE SOLO SU PC */
+        /* TASTO MONKEY - SOLO PC */
         #fs-btn {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
-            width: 35px; height: 35px;
-            background: rgba(0, 0, 0, 0.7); 
+            width: 40px; height: 40px;
+            background: rgba(0, 0, 0, 0.8); 
             border: 2px solid #ffcc00;
-            border-radius: 6px;
+            border-radius: 50%; /* Più simile a un tasto app ora */
             cursor: pointer;
-            z-index: 99999; /* Sempre in cima, anche in fullscreen */
+            z-index: 2147483647; 
             display: none; 
             align-items: center; justify-content: center;
-            transition: opacity 0.3s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
         
-        /* Icona dinamica */
+        /* Icona che cambia in X */
         .fs-icon { 
-            width: 14px; height: 14px; 
-            border: 2px solid #ffcc00; 
-            box-sizing: border-box; 
-            transition: all 0.2s;
+            position: relative;
+            width: 16px; height: 16px; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Il quadrato (Entra) */
+        .icon-box {
+            width: 12px; height: 12px;
+            border: 2px solid #ffcc00;
         }
 
-        /* Stato dell'icona quando siamo in Fullscreen (diventa un quadratino pieno o una X simbolica) */
-        .is-fs .fs-icon {
-            background-color: #ffcc00;
-        }
+        /* La X (Esci) */
+        .icon-close { display: none; color: #ffcc00; font-family: Arial, sans-serif; font-weight: bold; font-size: 20px; }
+
+        .is-fs .icon-box { display: none; }
+        .is-fs .icon-close { display: block; }
 
         video::-webkit-media-controls { display:none !important; }
     </style>
@@ -58,27 +65,27 @@
     <div class="video-container" id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop></video>
         <div id="fs-btn" onclick="toggleFullscreen()">
-            <div class="fs-icon"></div>
+            <div class="fs-icon">
+                <div class="icon-box"></div>
+                <div class="icon-close">✕</div>
+            </div>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('monkeyVideo');
         const btn = document.getElementById('fs-btn');
-        const container = document.getElementById('main-container');
 
-        // 1. ORA DI ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
             }).format(new Date()));
         }
 
-        // 2. PERCORSI ORIGINALI
         function getTargetSrc() {
             const hour = getRomeHour();
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
-            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_certified_video.mp4";
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
@@ -95,28 +102,19 @@
             }
         }
 
-        // 3. LOGICA TOGGLE (ENTRA/ESCI) SOLO PC
         function toggleFullscreen() {
-            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-
-            if (!isFS) {
-                // ENTRA: Puntiamo al video per isolarlo dal sito su PC
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                }
+            // Se siamo già in fullscreen, usciamo
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             } else {
-                // ESCI: Torna alla visualizzazione iframe
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
+                // Se non lo siamo, forziamo il video a tutto schermo
+                // Usiamo l'elemento video direttamente per "pulire" Chrome
+                if (video.requestFullscreen) video.requestFullscreen();
+                else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
             }
         }
 
-        // 4. CHECK DISPOSITIVO
         function checkDevice() {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (!isMobile) {
@@ -124,23 +122,20 @@
             }
         }
 
-        // 5. AGGIORNAMENTO UI (Cambio icona e stato)
         function updateUI() {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
             if (isFS) {
                 btn.classList.add('is-fs');
-                // Opzionale: puoi spostare il tasto in un angolo in fullscreen se disturba al centro
-                btn.style.bottom = "40px"; 
+                btn.style.bottom = "30px"; // Lo alziamo un po' in fullscreen
             } else {
                 btn.classList.remove('is-fs');
-                btn.style.bottom = "20px";
+                btn.style.bottom = "25px";
             }
         }
 
         document.addEventListener('fullscreenchange', updateUI);
         document.addEventListener('webkitfullscreenchange', updateUI);
 
-        // AVVIO
         initPlayer();
         checkDevice();
 
