@@ -2,13 +2,25 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monkey Radio Player - Stable</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
-        .video-container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; background: #000; }
-        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
-        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background-color: black; 
+        }
+        .video-container { 
+            width: 100vw; height: 100vh; 
+            display: flex; align-items: center; justify-content: center; 
+            background: black; position: relative;
+        }
+        video { 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            background: black;
+        }
+
+        /* TASTO MONKEY - VISIBILE SOLO SU PC */
         #fs-btn {
             position: absolute;
             bottom: 20px;
@@ -19,35 +31,54 @@
             border: 2px solid #ffcc00;
             border-radius: 6px;
             cursor: pointer;
-            z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
+            z-index: 99999; /* Sempre in cima, anche in fullscreen */
+            display: none; 
+            align-items: center; justify-content: center;
+            transition: opacity 0.3s;
         }
-        .fs-icon { width: 14px; height: 14px; border: 2px solid #ffcc00; box-sizing: border-box; }
+        
+        /* Icona dinamica */
+        .fs-icon { 
+            width: 14px; height: 14px; 
+            border: 2px solid #ffcc00; 
+            box-sizing: border-box; 
+            transition: all 0.2s;
+        }
+
+        /* Stato dell'icona quando siamo in Fullscreen (diventa un quadratino pieno o una X simbolica) */
+        .is-fs .fs-icon {
+            background-color: #ffcc00;
+        }
+
         video::-webkit-media-controls { display:none !important; }
     </style>
 </head>
 <body>
 
-    <div class="video-container">
+    <div class="video-container" id="main-container">
         <video id="monkeyVideo" autoplay muted playsinline loop></video>
-        <div id="fs-btn" onclick="smartFullscreen()">
+        <div id="fs-btn" onclick="toggleFullscreen()">
             <div class="fs-icon"></div>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('monkeyVideo');
+        const btn = document.getElementById('fs-btn');
+        const container = document.getElementById('main-container');
 
+        // 1. ORA DI ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
             }).format(new Date()));
         }
 
+        // 2. PERCORSI ORIGINALI
         function getTargetSrc() {
             const hour = getRomeHour();
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
-            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_certified_video.mp4";
+            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
             if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
             if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
@@ -64,45 +95,58 @@
             }
         }
 
-        // LA SVOLTA: GESTIONE INTELLIGENTE PC VS MOBILE
-        function smartFullscreen() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        // 3. LOGICA TOGGLE (ENTRA/ESCI) SOLO PC
+        function toggleFullscreen() {
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
 
-            if (isMobile) {
-                // SE SEI SU ANDROID/PIXEL: Apri la pagina stessa fuori dall'iframe
-                // Questo "rompe" la gabbia di Nicepage e apre il player puro
-                window.open(window.location.href, '_blank');
-            } else {
-                // SE SEI SU PC: Fullscreen diretto al VIDEO (non al sito)
+            if (!isFS) {
+                // ENTRA: Puntiamo al video per isolarlo dal sito su PC
                 if (video.requestFullscreen) {
                     video.requestFullscreen();
                 } else if (video.webkitRequestFullscreen) {
                     video.webkitRequestFullscreen();
                 }
+            } else {
+                // ESCI: Torna alla visualizzazione iframe
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
             }
         }
 
-        // Se la pagina viene aperta "pulita" (fuori dall'iframe) su mobile, 
-        // entra in fullscreen automaticamente al primo tocco
-        window.onload = () => {
-            initPlayer();
-            if (window.self === window.top && /Android/i.test(navigator.userAgent)) {
-                // Siamo fuori dall'iframe! Al primo tocco ovunque, vado in FS
-                document.body.addEventListener('click', () => {
-                    if (video.requestFullscreen) video.requestFullscreen();
-                }, { once: true });
+        // 4. CHECK DISPOSITIVO
+        function checkDevice() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (!isMobile) {
+                btn.style.display = "flex";
             }
-        };
+        }
+
+        // 5. AGGIORNAMENTO UI (Cambio icona e stato)
+        function updateUI() {
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+            if (isFS) {
+                btn.classList.add('is-fs');
+                // Opzionale: puoi spostare il tasto in un angolo in fullscreen se disturba al centro
+                btn.style.bottom = "40px"; 
+            } else {
+                btn.classList.remove('is-fs');
+                btn.style.bottom = "20px";
+            }
+        }
+
+        document.addEventListener('fullscreenchange', updateUI);
+        document.addEventListener('webkitfullscreenchange', updateUI);
+
+        // AVVIO
+        initPlayer();
+        checkDevice();
 
         setInterval(() => {
             if (video.src !== getTargetSrc()) initPlayer();
         }, 60000);
-
-        // UI Sync per PC
-        document.addEventListener('fullscreenchange', () => {
-            const isFS = document.fullscreenElement;
-            document.getElementById('fs-btn').style.display = isFS ? "none" : "flex";
-        });
     </script>
 </body>
 </html>
