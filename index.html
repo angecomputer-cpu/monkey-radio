@@ -69,38 +69,50 @@
         const video = document.getElementById('monkeyVideo');
         const btn = document.getElementById('fs-btn');
 
-        // 1. FUSO ORARIO ROMA (Essenziale per la coerenza del palinsesto)
+        // 1. FUSO ORARIO ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
             }).format(new Date()));
         }
 
-        // 2. PALINSESTO VIDEO (Corretto e testato)
+        // 2. PALINSESTO COMPLETO (Sistemata fascia 21-00)
         function getTargetSrc() {
             const hour = getRomeHour();
             const baseUrl = "https://archive.org/download/output_everyday_video/";
             
+            // 00:00 - 06:00
             if (hour >= 0 && hour < 6) return baseUrl + "output_archive_video.mp4";
+            // 06:00 - 09:00
             if (hour >= 6 && hour < 9) return baseUrl + "output_certified_video.mp4";
+            // 09:00 - 12:00
             if (hour >= 9 && hour < 12) return baseUrl + "output_everyday_video.mp4";
+            // 12:00 - 14:00
             if (hour >= 12 && hour < 14) return baseUrl + "output_archive_video.mp4";
+            // 14:00 - 18:00
             if (hour >= 14 && hour < 18) return baseUrl + "output_everyday_video.mp4";
+            // 18:00 - 21:00
             if (hour >= 18 && hour < 21) return baseUrl + "output_certified_video.mp4";
+            
+            // --- NUOVA FASCIA AGGIUNTA ---
+            // 21:00 - 00:00 (Ritorno a Everyday Video per la notte)
+            if (hour >= 21 && hour <= 23) return baseUrl + "output_everyday_video.mp4";
+            
+            // Default di sicurezza
             return baseUrl + "output_everyday_video.mp4";
         }
 
         function updateVideoSource() {
             const newSrc = getTargetSrc();
-            // Cambiamo l'SRC solo se è diverso da quello attuale per non resettare il video inutilmente
-            if (video.src !== newSrc) {
+            // Importante: usiamo .includes() perché video.src restituisce l'URL intero
+            if (!video.src.includes(newSrc)) {
                 video.src = newSrc;
                 video.load();
-                video.play().catch(e => console.log("Autoplay in attesa di interazione."));
+                video.play().catch(() => {});
             }
         }
 
-        // 3. LOGICA FULLSCREEN PC (Entra/Esci con X)
+        // 3. LOGICA FULLSCREEN PC
         function toggleFullscreen() {
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 if (document.exitFullscreen) document.exitFullscreen();
@@ -114,18 +126,13 @@
         // 4. ATTIVAZIONE TASTO SOLO SU PC
         function checkDevice() {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (!isMobile) {
-                btn.style.display = "flex";
-            }
+            if (!isMobile) { btn.style.display = "flex"; }
         }
 
         function updateUI() {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-            if (isFS) {
-                btn.classList.add('is-fs');
-            } else {
-                btn.classList.remove('is-fs');
-            }
+            if (isFS) btn.classList.add('is-fs');
+            else btn.classList.remove('is-fs');
         }
 
         document.addEventListener('fullscreenchange', updateUI);
@@ -137,7 +144,6 @@
 
         // CONTROLLO CAMBIO ORA (Ogni minuto)
         setInterval(updateVideoSource, 60000);
-
     </script>
 </body>
 </html>
