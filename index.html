@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio Player - Stable</title>
+    <title>Monkey Radio Player - Stable v1</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
@@ -18,7 +18,6 @@
             width: 100%; height: 100%; 
             object-fit: contain; 
             background: black;
-            transition: all 0.3s ease;
         }
 
         /* TASTO MONKEY - SOLO PC */
@@ -30,7 +29,7 @@
             width: 40px; height: 40px;
             background: rgba(0, 0, 0, 0.8); 
             border: 2px solid #ffcc00;
-            border-radius: 50%; /* Più simile a un tasto app ora */
+            border-radius: 50%;
             cursor: pointer;
             z-index: 2147483647; 
             display: none; 
@@ -38,20 +37,13 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
         
-        /* Icona che cambia in X */
         .fs-icon { 
             position: relative;
             width: 16px; height: 16px; 
             display: flex; align-items: center; justify-content: center;
         }
         
-        /* Il quadrato (Entra) */
-        .icon-box {
-            width: 12px; height: 12px;
-            border: 2px solid #ffcc00;
-        }
-
-        /* La X (Esci) */
+        .icon-box { width: 12px; height: 12px; border: 2px solid #ffcc00; }
         .icon-close { display: none; color: #ffcc00; font-family: Arial, sans-serif; font-weight: bold; font-size: 20px; }
 
         .is-fs .icon-box { display: none; }
@@ -76,20 +68,33 @@
         const video = document.getElementById('monkeyVideo');
         const btn = document.getElementById('fs-btn');
 
+        // 1. FUSO ORARIO ROMA
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
                 hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
             }).format(new Date()));
         }
 
+        // 2. PALINSESTO CORRETTO (FIX LINK ORE 18)
         function getTargetSrc() {
             const hour = getRomeHour();
+            
+            // Fascia Notturna
             if (hour >= 0 && hour < 6) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
-            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_certified_video.mp4";
+            // Fascia Mattina
+            if (hour >= 6 && hour < 9) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            // Fascia Mezzogiorno
             if (hour >= 9 && hour < 12) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
+            // Fascia Pomeriggio 1
             if (hour >= 12 && hour < 14) return "https://archive.org/download/output_everyday_video/output_archive_video.mp4";
+            // Fascia Pomeriggio 2
             if (hour >= 14 && hour < 18) return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
-            if (hour >= 18 && hour < 21) return "https://archive.org/download/output_certified_video.mp4";
+            
+            // --- FIX ORE 18:00 ---
+            // Ho ripristinato il percorso completo corretto
+            if (hour >= 18 && hour < 21) return "https://archive.org/download/output_everyday_video/output_certified_video.mp4";
+            
+            // Fascia Sera/Default
             return "https://archive.org/download/output_everyday_video/output_everyday_video.mp4";
         }
 
@@ -102,31 +107,28 @@
             }
         }
 
+        // 3. LOGICA FULLSCREEN PC
         function toggleFullscreen() {
-            // Se siamo già in fullscreen, usciamo
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 if (document.exitFullscreen) document.exitFullscreen();
                 else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             } else {
-                // Se non lo siamo, forziamo il video a tutto schermo
-                // Usiamo l'elemento video direttamente per "pulire" Chrome
                 if (video.requestFullscreen) video.requestFullscreen();
                 else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
             }
         }
 
+        // 4. CHECK DISPOSITIVO
         function checkDevice() {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (!isMobile) {
-                btn.style.display = "flex";
-            }
+            if (!isMobile) { btn.style.display = "flex"; }
         }
 
         function updateUI() {
             const isFS = document.fullscreenElement || document.webkitFullscreenElement;
             if (isFS) {
                 btn.classList.add('is-fs');
-                btn.style.bottom = "30px"; // Lo alziamo un po' in fullscreen
+                btn.style.bottom = "30px";
             } else {
                 btn.classList.remove('is-fs');
                 btn.style.bottom = "25px";
@@ -136,11 +138,17 @@
         document.addEventListener('fullscreenchange', updateUI);
         document.addEventListener('webkitfullscreenchange', updateUI);
 
+        // AVVIO
         initPlayer();
         checkDevice();
 
+        // Controllo palinsesto ogni minuto per il cambio fascia oraria
         setInterval(() => {
-            if (video.src !== getTargetSrc()) initPlayer();
+            const currentTarget = getTargetSrc();
+            // Verifichiamo se l'URL del video deve cambiare
+            if (!video.src.includes(currentTarget)) {
+                initPlayer();
+            }
         }, 60000);
     </script>
 </body>
