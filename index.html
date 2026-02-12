@@ -76,35 +76,41 @@
             }).format(new Date()));
         }
 
-        // 2. PALINSESTO COMPLETO (Sistemata fascia 21-00)
+        // 2. PALINSESTO COMPLETO CON NUOVO LINK CERTIFIED
         function getTargetSrc() {
             const hour = getRomeHour();
             const baseUrl = "https://archive.org/download/output_everyday_video/";
             
-            // 00:00 - 06:00
+            // IL TUO NUOVO LINK CERTIFIED (con nuovo logo)
+            const newCertifiedLink = "https://ia902908.us.archive.org/18/items/2026-02-12-15-29-20-muto/2026-02-12%2015-29-20_muto.mp4";
+
+            // 00:00 - 06:00 (Notte)
             if (hour >= 0 && hour < 6) return baseUrl + "output_archive_video.mp4";
-            // 06:00 - 09:00
-            if (hour >= 6 && hour < 9) return baseUrl + "output_certified_video.mp4";
-            // 09:00 - 12:00
-            if (hour >= 9 && hour < 12) return baseUrl + "output_everyday_video.mp4";
-            // 12:00 - 14:00
-            if (hour >= 12 && hour < 14) return baseUrl + "output_archive_video.mp4";
-            // 14:00 - 18:00
-            if (hour >= 14 && hour < 18) return baseUrl + "output_everyday_video.mp4";
-            // 18:00 - 21:00
-            if (hour >= 18 && hour < 21) return baseUrl + "output_certified_video.mp4";
             
-            // --- NUOVA FASCIA AGGIUNTA ---
-            // 21:00 - 00:00 (Ritorno a Everyday Video per la notte)
+            // 06:00 - 09:00 (Certified - NUOVO)
+            if (hour >= 6 && hour < 9) return newCertifiedLink;
+            
+            // 09:00 - 12:00 (Everyday)
+            if (hour >= 9 && hour < 12) return baseUrl + "output_everyday_video.mp4";
+            
+            // 12:00 - 14:00 (Archive)
+            if (hour >= 12 && hour < 14) return baseUrl + "output_archive_video.mp4";
+            
+            // 14:00 - 18:00 (Everyday)
+            if (hour >= 14 && hour < 18) return baseUrl + "output_everyday_video.mp4";
+            
+            // 18:00 - 21:00 (Certified - NUOVO)
+            if (hour >= 18 && hour < 21) return newCertifiedLink;
+            
+            // 21:00 - 23:59 (Notte fonda - Everyday)
             if (hour >= 21 && hour <= 23) return baseUrl + "output_everyday_video.mp4";
             
-            // Default di sicurezza
             return baseUrl + "output_everyday_video.mp4";
         }
 
         function updateVideoSource() {
             const newSrc = getTargetSrc();
-            // Importante: usiamo .includes() perché video.src restituisce l'URL intero
+            // Controllo intelligente dell'URL per evitare refresh inutili
             if (!video.src.includes(newSrc)) {
                 video.src = newSrc;
                 video.load();
