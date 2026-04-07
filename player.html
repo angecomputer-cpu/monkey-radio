@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Yellow Monkey Player</title>
+    <style>
+        body { 
+            background: #ffcc00; /* SFONDO YELLOW MONKEY */
+            color: #000; 
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            padding: 10px;
+            overflow: hidden;
+        }
+        .container { 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            padding: 25px;
+            border: 3px solid #000;
+            border-radius: 40px;
+            background: rgba(255, 204, 0, 0.9); /* Leggero contrasto */
+            box-shadow: 10px 10px 0px #000; /* Stile fumetto/punk */
+        }
+        video { 
+            width: 100%; 
+            border-radius: 20px; 
+            border: 4px solid #000;
+            margin-bottom: 20px;
+        }
+        audio { 
+            width: 100%; 
+            height: 45px;
+            margin-top: 15px;
+            /* Player nero su sfondo giallo */
+            filter: contrast(1.5) brightness(0.2); 
+        }
+        h1 { 
+            font-size: 1.5rem; 
+            margin: 10px 0; 
+            color: #000; 
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .status-text { 
+            font-size: 0.8rem; 
+            color: #000; 
+            margin-top: 20px;
+            font-weight: bold;
+            text-transform: lowercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video autoplay loop muted playsinline>
+            <source src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" type="video/mp4">
+        </video>
+        
+        <h1>monkey radio v5.9</h1>
+
+        <audio controls autoplay>
+            <source src="https://a11.asurahosting.com:8610/radio.mp3" type="audio/mpeg">
+            fango! il browser non supporta lo stream.
+        </audio>
+
+        <p class="status-text">ascolta e taci, cialtrone. 🚬🌀</p>
+    </div>
+</body>
+</html>
