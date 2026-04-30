@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Monkey Radio v6.7 - Golden Edition</title>
+    <title>Monkey Radio v6.8 - No Borders Edition</title>
     <style>
-        /* SFONDO PAGINA BIANCO */
         body { 
             background: #ffffff; 
             margin: 0; 
@@ -17,48 +16,48 @@
             overflow: hidden;
         }
 
-        /* IL PANNELLO IN PRIMO PIANO - GIALLO LOGO */
+        /* PANNELLO GIALLO SENZA BORDO */
         .container { 
             width: 85%; 
             max-width: 300px; 
             text-align: center; 
-            padding: 25px;
-            border-radius: 45px;
-            background: #ffcc00; /* GIALLO DEL LOGO */
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); /* OMBRA MARCATA PER IL PRIMO PIANO */
-            border: 3px solid #000; /* BORDO NERO PER DEFINIRE IL CARATTERE */
+            padding: 30px 20px;
+            border-radius: 50px;
+            background: #ffcc00; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15); /* Ombra che dà profondità */
+            border: none; /* BORDO ELIMINATO */
         }
 
-        /* LOGO ANIMATO */
+        /* LOGO ANIMATO SENZA BORDO */
         video { 
-            width: 130px; 
-            height: 130px;
-            border-radius: 25px; 
-            margin: 0 auto 15px auto;
+            width: 140px; 
+            height: 140px;
+            border-radius: 30px; 
+            margin: 0 auto 20px auto;
             display: block;
             pointer-events: none;
-            border: 2px solid #000;
+            object-fit: cover;
+            border: none; /* BORDO ELIMINATO */
         }
 
-        /* BOX TITOLO - NERO PER CONTRASTO */
+        /* BOX TITOLO NERO */
         #now-playing {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 800;
             background: #000; 
-            color: #ffcc00; /* TESTO GIALLO SU NERO */
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 15px;
+            color: #ffcc00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 20px;
             min-height: 1rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* PLAYER AUDIO */
         audio { 
             width: 100%; 
-            height: 40px;
-            filter: invert(100%) contrast(150%); /* LO RENDE NERO SU GIALLO */
+            height: 45px;
+            filter: invert(100%) contrast(150%);
         }
 
         h1 { 
@@ -67,15 +66,17 @@
             font-weight: 900; 
             color: #000;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .live-indicator {
-            display: inline-block;
             width: 8px;
             height: 8px;
             background: #ff0000;
             border-radius: 50%;
-            margin-right: 6px;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -85,7 +86,7 @@
             <source src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" type="video/mp4">
         </video>
         
-        <h1><span class="live-indicator"></span>MONKEY RADIO</h1>
+        <h1><div class="live-indicator"></div>MONKEY RADIO</h1>
         
         <div id="now-playing">SINCRO...</div>
 
@@ -97,6 +98,7 @@
     <script>
         async function updateMeta() {
             try {
+                // Aggiornamento titoli ogni 15 secondi da Asura Hosting
                 const response = await fetch('https://a11.asurahosting.com:8610/status-json.xsl');
                 const data = await response.json();
                 let track = "MONKEY RADIO LIVE";
