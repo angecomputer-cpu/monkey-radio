@@ -34,11 +34,11 @@
             background: #ffffff !important;
         }
 
-        /* Logo Quadrato Secco e Fisso - Rimosso l'arrotondamento e l'ombra */
+        /* Logo Quadrato Secco e Fisso */
         .logo-box {
             width: 55px;
             height: 55px;
-            border-radius: 0; /* Angoli vivi, zero smussature */
+            border-radius: 0;
             overflow: hidden;
             background: #000000;
             flex-shrink: 0;
@@ -53,19 +53,36 @@
             object-fit: cover;
         }
 
-        /* Area Testi Centrale */
+        /* Area Testi Centrale Intelligente */
         .info-box {
             flex-grow: 1;
             min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        /* Container che maschera il testo */
+        .scroll-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        /* Il wrapper che si muove solo se serve */
+        .scroll-wrapper {
+            display: inline-flex;
+            align-items: center;
+            will-change: transform;
         }
 
         .info-box h2 {
             font-size: 1.05rem;
             font-weight: 800;
             color: #000000;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             line-height: 1.2;
         }
 
@@ -75,10 +92,22 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+        }
+
+        /* Elemento testuale singolo dentro il wrapper */
+        .text-item {
+            padding-right: 20px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 2px;
+        }
+
+        /* Animazione CSS lineare generata dinamicamente */
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        .is-scrolling {
+            animation: marquee 12s linear infinite;
         }
 
         /* Controlli e Stato a Destra */
@@ -114,7 +143,7 @@
             fill: currentColor;
         }
 
-        /* Badge LIVE Rosso Fisso come TuneIn */
+        /* Badge LIVE Rosso Fisso */
         .status-badge {
             font-size: 0.65rem;
             padding: 4px 8px;
@@ -135,8 +164,16 @@
         </div>
 
         <div class="info-box">
-            <h2>Monkey Radio Italy</h2>
-            <p id="track-title">Diretta Streaming</p>
+            <div class="scroll-container" id="title-container">
+                <div class="scroll-wrapper" id="title-wrapper">
+                    <h2><span class="text-item" id="main-title">Monkey Radio Italy</span></h2>
+                </div>
+            </div>
+            <div class="scroll-container" id="track-container">
+                <div class="scroll-wrapper" id="track-wrapper">
+                    <p><span class="text-item" id="track-title">Diretta Streaming</span></p>
+                </div>
+            </div>
         </div>
 
         <div class="actions-box">
@@ -155,6 +192,13 @@
         const audio = document.getElementById('audioStream');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
+        
+        const titleContainer = document.getElementById('title-container');
+        const titleWrapper = document.getElementById('title-wrapper');
+        const mainTitle = document.getElementById('main-title');
+
+        const trackContainer = document.getElementById('track-container');
+        const trackWrapper = document.getElementById('track-wrapper');
         const trackTitle = document.getElementById('track-title');
 
         const playSVG = '<path d="M8 5v14l11-7z"/>';
@@ -162,13 +206,34 @@
 
         let wakeLock = null;
 
+        // Gestione scorrimento intelligente con faccina scimmia 🐵
+        function setupMarquee(container, wrapper, item, textContent) {
+            wrapper.classList.remove('is-scrolling');
+            wrapper.innerHTML = '';
+            
+            const cleanItem = item.cloneNode(false);
+            cleanItem.textContent = textContent;
+            wrapper.appendChild(cleanItem);
+
+            if (cleanItem.offsetWidth > container.offsetWidth) {
+                cleanItem.textContent = textContent + ' 🐵 ';
+                const duplicateItem = cleanItem.cloneNode(true);
+                wrapper.appendChild(duplicateItem);
+                
+                wrapper.classList.add('is-scrolling');
+            }
+        }
+
+        function checkAllMarquees() {
+            setupMarquee(titleContainer, titleWrapper, mainTitle, "Monkey Radio Italy");
+            setupMarquee(trackContainer, trackWrapper, trackTitle, trackTitle.getAttribute('data-text') || "Diretta Streaming");
+        }
+
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
                     wakeLock = await navigator.wakeLock.request('screen');
-                } catch (err) {
-                    console.log("Wake Lock non attivo");
-                }
+                } catch (err) {}
             }
         }
 
@@ -183,7 +248,7 @@
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: 'Monkey Radio Italy',
-                    artist: trackTitle.textContent,
+                    artist: trackTitle.getAttribute('data-text') || 'Diretta Streaming',
                     album: 'Official Player',
                     artwork: [
                         { src: 'https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4', sizes: '512x512', type: 'video/mp4' }
@@ -204,7 +269,7 @@
                         requestWakeLock();
                         updateMediaSession();
                     })
-                    .catch(err => console.log("Autoplay intercettato"));
+                    .catch(err => console.log("Autoplay bloccato"));
             } else {
                 audio.pause();
                 playIcon.innerHTML = playSVG;
@@ -215,6 +280,8 @@
         playBtn.addEventListener('click', togglePlay);
 
         window.addEventListener('DOMContentLoaded', () => {
+            checkAllMarquees();
+            
             audio.play().then(() => {
                 playIcon.innerHTML = pauseSVG;
                 requestWakeLock();
@@ -230,6 +297,8 @@
             });
         });
 
+        window.addEventListener('resize', checkAllMarquees);
+
         async function fetchIcecastMetadata() {
             try {
                 const response = await fetch('https://a11.asurahosting.com:8610/status-json.xsl');
@@ -237,9 +306,12 @@
                 if (data && data.icestats && data.icestats.source) {
                     const source = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
                     if (source.title) {
-                        trackTitle.textContent = source.title;
+                        const cleanTitle = source.title.trim();
+                        trackTitle.setAttribute('data-text', cleanTitle);
+                        setupMarquee(trackContainer, trackWrapper, trackTitle, cleanTitle);
+                        
                         if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
-                            navigator.mediaSession.metadata.title = source.title;
+                            navigator.mediaSession.metadata.title = cleanTitle;
                         }
                     }
                 }
