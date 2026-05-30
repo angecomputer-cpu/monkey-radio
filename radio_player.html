@@ -22,7 +22,7 @@
             overflow: hidden;
         }
 
-        /* Fascetta fissa stile TuneIn totalmente bianca */
+        /* Fascetta stile TuneIn totalmente bianca */
         .player-bar {
             width: 100%;
             height: 100%;
@@ -70,7 +70,7 @@
             white-space: nowrap;
         }
 
-        /* Animazione CSS nativa e fluida: non si bloccherà MAI */
+        /* Animazione CSS nativa e fluida */
         .scroll-text {
             display: inline-block;
             padding-left: 100%;
@@ -90,7 +90,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            animation-duration: 10s; /* Velocità leggermente diversa per estetica */
+            animation-duration: 10s;
         }
 
         @keyframes marquee {
@@ -168,15 +168,14 @@
         </div>
     </div>
 
-    <audio id="audioStream" crossorigin="anonymous">
-        <source src="https://a11.asurahosting.com:8610/radio.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="audioStream" crossorigin="anonymous"></audio>
 
     <script>
         const audio = document.getElementById('audioStream');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
 
+        const STREAM_URL = "https://a11.asurahosting.com:8610/radio.mp3";
         const playSVG = '<path d="M8 5v14l11-7z"/>';
         const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
@@ -214,17 +213,21 @@
         }
 
         function togglePlay() {
-            if (audio.paused) {
-                audio.load();
+            if (audio.paused || !audio.src) {
+                // Inietta l'URL con un parametro temporale univoco per distruggere la vecchia cache del browser
+                audio.src = STREAM_URL + "?cb=" + Date.now();
+                
                 audio.play()
                     .then(() => {
                         playIcon.innerHTML = pauseSVG;
                         requestWakeLock();
                         updateMediaSession();
                     })
-                    .catch(err => console.log("Autoplay intercettato"));
+                    .catch(err => console.log("Riproduzione intercettata o bloccata dal browser"));
             } else {
                 audio.pause();
+                // Svuota completamente la sorgente per stoppare il download dei dati in background
+                audio.src = ""; 
                 playIcon.innerHTML = playSVG;
                 releaseWakeLock();
             }
@@ -232,24 +235,19 @@
 
         playBtn.addEventListener('click', togglePlay);
 
+        // Gestione corretta dell'avvio automatico all'interazione dell'utente
         window.addEventListener('DOMContentLoaded', () => {
-            audio.play().then(() => {
-                playIcon.innerHTML = pauseSVG;
-                requestWakeLock();
-                updateMediaSession();
-            }).catch(() => {
-                const startOnInteraction = () => {
-                    togglePlay();
-                    document.removeEventListener('click', startOnInteraction);
-                    document.removeEventListener('touchstart', startOnInteraction);
-                };
-                document.addEventListener('click', startOnInteraction);
-                document.addEventListener('touchstart', startOnInteraction);
-            });
+            const startOnInteraction = () => {
+                togglePlay();
+                document.removeEventListener('click', startOnInteraction);
+                document.removeEventListener('touchstart', startOnInteraction);
+            };
+            document.addEventListener('click', startOnInteraction);
+            document.addEventListener('touchstart', startOnInteraction);
         });
 
         document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
+            if (wakeLock !== null && document.visibilityState === 'visible' && !audio.paused) {
                 await requestWakeLock();
             }
         });
