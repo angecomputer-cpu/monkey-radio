@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Radio Italy Player</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .player-container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 25px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eef2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo-container {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-container h2 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .info-container p {
+            font-size: 0.9rem;
+            color: #7d8590;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 500;
+        }
+
+        .controls {
+            margin: 5px 0;
+        }
+
+        .play-btn {
+            background: #ff9800;
+            border: none;
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.35);
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+        }
+
+        .status-tag {
+            font-size: 0.75rem;
+            background: #f0f2f5;
+            padding: 5px 14px;
+            border-radius: 12px;
+            color: #656d76;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .status-tag.live {
+            color: #e53e3e;
+            background: #fff5f5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <div class="logo-container">
+            <video src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" autoplay loop muted playsinline></video>
+        </div>
+
+        <div class="info-container">
+            <h2>Monkey Radio Italy</h2>
+            <p id="track-title">Diretta Streaming</p>
+        </div>
+
+        <div class="controls">
+            <button class="play-btn" id="playBtn" aria-label="Riproduci">
+                <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+        </div>
+
+        <div class="status-tag live" id="statusTag">LIVE</div>
+    </div>
+
+    <audio id="audioStream" crossorigin="anonymous">
+        <source src="https://a11.asurahosting.com:8610/radio.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const audio = document.getElementById('audioStream');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const trackTitle = document.getElementById('track-title');
+        const statusTag = document.getElementById('statusTag');
+
+        const playSVG = '<path d="M8 5v14l11-7z"/>';
+        const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.log(`Wake Lock non attivato: ${err.message}`);
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        function updateMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Monkey Radio Italy',
+                    artist: 'Diretta Streaming',
+                    album: 'Official Player',
+                    artwork: [
+                        { src: 'https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4', sizes: '512x512', type: 'video/mp4' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', togglePlay);
+                navigator.mediaSession.setActionHandler('pause', togglePlay);
+            }
+        }
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.load();
+                audio.play()
+                    .then(() => {
+                        playIcon.innerHTML = pauseSVG;
+                        statusTag.textContent = "CONNESSO";
+                        requestWakeLock();
+                        updateMediaSession();
+                    })
+                    .catch(err => console.log("Riproduzione bloccata: ", err));
+            } else {
+                audio.pause();
+                playIcon.innerHTML = playSVG;
+                statusTag.textContent = "PAUSA";
+                releaseWakeLock();
+            }
+        }
+
+        playBtn.addEventListener('click', togglePlay);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            audio.play().then(() => {
+                playIcon.innerHTML = pauseSVG;
+                requestWakeLock();
+                updateMediaSession();
+            }).catch(() => {
+                statusTag.textContent = "TOCCA PER ASCOLTARE";
+                const startOnInteraction = () => {
+                    togglePlay();
+                    document.removeEventListener('click', startOnInteraction);
+                    document.removeEventListener('touchstart', startOnInteraction);
+                };
+                document.addEventListener('click', startOnInteraction);
+                document.addEventListener('touchstart', startOnInteraction);
+            });
+        });
+
+        async function fetchIcecastMetadata() {
+            try {
+                const response = await fetch('https://a11.asurahosting.com:8610/status-json.xsl');
+                const data = await response.json();
+                if (data && data.icestats && data.icestats.source) {
+                    const source = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
+                    if (source.title) {
+                        trackTitle.textContent = source.title;
+                        if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
+                            navigator.mediaSession.metadata.title = source.title;
+                        }
+                    }
+                }
+            } catch (error) {
+                // Rimani sul valore predefinito se fallisce
+            }
+        }
+
+        setInterval(fetchIcecastMetadata, 15000);
+        fetchIcecastMetadata();
+
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>
