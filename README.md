@@ -1,4 +1,4 @@
-# 🐒 Monkey Radio - Player Stable (v1.0)
+# 🐒 Monkey Radio - Video Player Stable (v1.0)
 
 > **Status:** `v1.0 Stable`  
 > **Sincronizzazione:** Roma, Italia (Europe/Rome)
