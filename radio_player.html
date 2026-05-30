@@ -16,7 +16,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #ffffff !important; /* Bianco puro garantito */
+            background: #ffffff !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             color: #000000;
             overflow: hidden;
@@ -34,14 +34,13 @@
             background: #ffffff !important;
         }
 
-        /* Logo Quadrato Fisso */
+        /* Logo Quadrato Secco e Fisso - Rimosso l'arrotondamento e l'ombra */
         .logo-box {
             width: 55px;
             height: 55px;
-            border-radius: 6px;
+            border-radius: 0; /* Angoli vivi, zero smussature */
             overflow: hidden;
             background: #000000;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
             display: flex;
             justify-content: center;
@@ -90,7 +89,6 @@
             flex-shrink: 0;
         }
 
-        /* Pulsante nero con icona bianca per totale pulizia visiva */
         .play-btn {
             background: #000000; 
             border: none;
@@ -116,18 +114,14 @@
             fill: currentColor;
         }
 
+        /* Badge LIVE Rosso Fisso come TuneIn */
         .status-badge {
             font-size: 0.65rem;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 700;
             letter-spacing: 0.5px;
-            background: #f0f0f0;
-            color: #333333;
             text-align: center;
-        }
-
-        .status-badge.live {
             color: #ffffff;
             background: #e53e3e;
         }
@@ -137,7 +131,7 @@
 
     <div class="player-bar">
         <div class="logo-box">
-            <video src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" autoplay loop muted playsinline></video>
+            <video src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" preload="auto" loop muted playsinline></video>
         </div>
 
         <div class="info-box">
@@ -146,7 +140,7 @@
         </div>
 
         <div class="actions-box">
-            <div class="status-badge live" id="statusTag">LIVE</div>
+            <div class="status-badge" id="statusTag">LIVE</div>
             <button class="play-btn" id="playBtn" aria-label="Riproduci">
                 <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
@@ -162,7 +156,6 @@
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
         const trackTitle = document.getElementById('track-title');
-        const statusTag = document.getElementById('statusTag');
 
         const playSVG = '<path d="M8 5v14l11-7z"/>';
         const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
@@ -208,8 +201,6 @@
                 audio.play()
                     .then(() => {
                         playIcon.innerHTML = pauseSVG;
-                        statusTag.textContent = "ONLINE";
-                        statusTag.classList.remove('live');
                         requestWakeLock();
                         updateMediaSession();
                     })
@@ -217,8 +208,6 @@
             } else {
                 audio.pause();
                 playIcon.innerHTML = playSVG;
-                statusTag.textContent = "PAUSA";
-                statusTag.classList.remove('live');
                 releaseWakeLock();
             }
         }
@@ -231,8 +220,6 @@
                 requestWakeLock();
                 updateMediaSession();
             }).catch(() => {
-                statusTag.textContent = "ASCOLTA";
-                statusTag.classList.remove('live');
                 const startOnInteraction = () => {
                     togglePlay();
                     document.removeEventListener('click', startOnInteraction);
