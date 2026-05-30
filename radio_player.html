@@ -16,13 +16,13 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #ffffff; /* Sfondo bianco richiesto */
+            background: #ffffff; /* Sfondo bianco puro */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: #4A3700; /* Marrone caldo rilassante */
+            color: #000000; /* Testo nero puro */
             overflow: hidden;
         }
 
-        /* Fascetta fissa stile TuneIn con sfondo bianco totale */
+        /* Fascetta fissa stile TuneIn totalmente bianca */
         .player-bar {
             width: 100%;
             height: 100%;
@@ -38,10 +38,10 @@
         .logo-box {
             width: 55px;
             height: 55px;
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
             background: #000;
-            box-shadow: 0 2px 6px rgba(74, 55, 0, 0.1);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
             display: flex;
             justify-content: center;
@@ -63,7 +63,7 @@
         .info-box h2 {
             font-size: 1.05rem;
             font-weight: 800;
-            color: #4A3700;
+            color: #000000; /* Nero puro */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -72,7 +72,7 @@
 
         .info-box p {
             font-size: 0.8rem;
-            color: #6B5200;
+            color: #555555; /* Grigio scuro leggibile */
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -90,10 +90,11 @@
             flex-shrink: 0;
         }
 
+        /* Pulsante con base nera e icona Giallo Monkey */
         .play-btn {
-            background: #4A3700; 
+            background: #000000; 
             border: none;
-            color: #FFD32A; /* Icona gialla Monkey per richiamare il brand */
+            color: #FFD32A; 
             width: 46px;
             height: 46px;
             border-radius: 50%;
@@ -101,4 +102,171 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 3px 8px rgba
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s ease;
+        }
+
+        .play-btn:active {
+            transform: scale(0.92);
+        }
+
+        .play-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: #f0f0f0;
+            color: #333333;
+            text-align: center;
+        }
+
+        .status-badge.live {
+            color: #ffffff;
+            background: #e53e3e; /* Rosso per il LIVE */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-bar">
+        <div class="logo-box">
+            <video src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" autoplay loop muted playsinline></video>
+        </div>
+
+        <div class="info-box">
+            <h2>Monkey Radio Italy</h2>
+            <p id="track-title">Diretta Streaming</p>
+        </div>
+
+        <div class="actions-box">
+            <div class="status-badge live" id="statusTag">LIVE</div>
+            <button class="play-btn" id="playBtn" aria-label="Riproduci">
+                <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <audio id="audioStream" crossorigin="anonymous">
+        <source src="https://a11.asurahosting.com:8610/radio.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const audio = document.getElementById('audioStream');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const trackTitle = document.getElementById('track-title');
+        const statusTag = document.getElementById('statusTag');
+
+        const playSVG = '<path d="M8 5v14l11-7z"/>';
+        const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.log("Wake Lock non attivo");
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        function updateMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Monkey Radio Italy',
+                    artist: trackTitle.textContent,
+                    album: 'Official Player',
+                    artwork: [
+                        { src: 'https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4', sizes: '512x512', type: 'video/mp4' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', togglePlay);
+                navigator.mediaSession.setActionHandler('pause', togglePlay);
+            }
+        }
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.load();
+                audio.play()
+                    .then(() => {
+                        playIcon.innerHTML = pauseSVG;
+                        statusTag.textContent = "ONLINE";
+                        statusTag.classList.remove('live');
+                        requestWakeLock();
+                        updateMediaSession();
+                    })
+                    .catch(err => console.log("Autoplay intercettato"));
+            } else {
+                audio.pause();
+                playIcon.innerHTML = playSVG;
+                statusTag.textContent = "PAUSA";
+                statusTag.classList.remove('live');
+                releaseWakeLock();
+            }
+        }
+
+        playBtn.addEventListener('click', togglePlay);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            audio.play().then(() => {
+                playIcon.innerHTML = pauseSVG;
+                requestWakeLock();
+                updateMediaSession();
+            }).catch(() => {
+                statusTag.textContent = "ASCOLTA";
+                statusTag.classList.remove('live');
+                const startOnInteraction = () => {
+                    togglePlay();
+                    document.removeEventListener('click', startOnInteraction);
+                    document.removeEventListener('touchstart', startOnInteraction);
+                };
+                document.addEventListener('click', startOnInteraction);
+                document.addEventListener('touchstart', startOnInteraction);
+            });
+        });
+
+        async function fetchIcecastMetadata() {
+            try {
+                const response = await fetch('https://a11.asurahosting.com:8610/status-json.xsl');
+                const data = await response.json();
+                if (data && data.icestats && data.icestats.source) {
+                    const source = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
+                    if (source.title) {
+                        trackTitle.textContent = source.title;
+                        if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
+                            navigator.mediaSession.metadata.title = source.title;
+                        }
+                    }
+                }
+            } catch (error) {}
+        }
+
+        setInterval(fetchIcecastMetadata, 15000);
+        fetchIcecastMetadata();
+
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>
