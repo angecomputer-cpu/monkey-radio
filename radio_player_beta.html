@@ -3,178 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio - Beta Player</title>
+    <title>Monkey Radio Italy Player</title>
     <style>
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #ffffff !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #000000;
+            overflow: hidden;
+        }
+
+        .player-bar {
+            width: 100%;
+            height: 100%;
+            padding: 0 15px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            background: #ffffff !important;
+        }
+
+        .logo-box {
+            width: 80px;  
+            height: 100%; 
+            border-radius: 0;
+            overflow: hidden;
+            background: #000000;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-box {
+            flex-grow: 1;
+            min-width: 0;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            align-items: flex-start;
+            gap: 2px;
         }
-        #playBtn {
-            background-color: #ff4500;
-            color: white;
+
+        .scroll-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .scroll-wrapper {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            will-change: transform;
+            justify-content: flex-start;
+        }
+
+        .info-box h2 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #000000;
+            line-height: 1.2;
+        }
+
+        .info-box p {
+            font-size: 0.8rem;
+            color: #555555;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .text-item {
+            white-space: nowrap;
+            padding-right: 0;
+        }
+
+        .is-scrolling {
+            animation: marquee 12s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        .actions-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .play-btn {
+            background: #000000; 
             border: none;
-            padding: 20px 40px;
-            font-size: 24px;
-            font-weight: bold;
-            border-radius: 10px;
+            color: #ffffff; 
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.5);
-            transition: transform 0.1s;
-        }
-        #playBtn:active {
-            transform: scale(0.95);
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #aaaaaa;
-        }
-        #log {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 400px;
-            height: 150px;
-            background: #000;
-            border: 1px solid #333;
-            padding: 10px;
-            overflow-y: auto;
-            font-size: 12px;
-            color: #00ff00;
-        }
-    </style>
-</head>
-<body>
-
-    <button id="playBtn">▶ PLAY MONKEY RADIO</button>
-    <div id="status">Stato: In attesa...</div>
-    <div id="log"></div>
-
-    <script>
-        const STREAM_URL = "https://a11.asurahosting.com:8610/radio.mp3";
-        let audio = new Audio();
-        let isPlaying = false;
-        let userIntentPlay = false; // Traccia se l'utente vuole che suoni
-        let reconnectTimer = null;
-
-        const playBtn = document.getElementById('playBtn');
-        const statusDiv = document.getElementById('status');
-        const logDiv = document.getElementById('log');
-
-        function log(msg) {
-            const time = new Date().toLocaleTimeString();
-            logDiv.innerHTML += `[${time}] ${msg}<br>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s ease;
         }
 
-        function updateStatus(msg, color) {
-            statusDiv.innerText = `Stato: ${msg}`;
-            statusDiv.style.color = color;
-        }
-
-        function initAudio() {
-            // Aggiunge un timestamp per bypassare la cache del browser in caso di caduta rete
-            const cacheBuster = new Date().getTime();
-            audio.src = `${STREAM_URL}?cb=${cacheBuster}`;
-            audio.crossOrigin = "anonymous";
-            audio.preload = "none";
-        }
-
-        function playStream() {
-            userIntentPlay = true;
-            initAudio();
-            
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    isPlaying = true;
-                    playBtn.innerText = "⏸ STOP";
-                    updateStatus("In riproduzione", "#00ff00");
-                    log("Riproduzione avviata con successo.");
-                }).catch(error => {
-                    log(`Errore Autoplay: ${error.message}`);
-                    updateStatus("Errore avvio", "#ff0000");
-                    isPlaying = false;
-                });
-            }
-        }
-
-        function stopStream() {
-            userIntentPlay = false;
-            isPlaying = false;
-            audio.pause();
-            audio.src = ""; // Svuota il buffer
-            playBtn.innerText = "▶ PLAY MONKEY RADIO";
-            updateStatus("In pausa", "#aaaaaa");
-            log("Riproduzione fermata dall'utente.");
-            clearTimeout(reconnectTimer);
-        }
-
-        playBtn.addEventListener('click', () => {
-            if (isPlaying) {
-                stopStream();
-            } else {
-                playStream();
-            }
-        });
-
-        // --- GESTIONE RESILIENZA RETE E BLUETOOTH ---
-
-        // 1. Il sistema operativo mette in pausa (es. disconnessione Bluetooth)
-        audio.addEventListener('pause', () => {
-            if (userIntentPlay) {
-                log("Pausa rilevata dal sistema (Bluetooth perso?). Forzo ripresa...");
-                updateStatus("Recupero audio...", "#ffa500");
-                // Breve ritardo per permettere al SO di instradare l'audio sul nuovo dispositivo
-                setTimeout(() => {
-                    if (userIntentPlay) audio.play();
-                }, 1000);
-            }
-        });
-
-        // 2. Il buffer si svuota o la rete cade
-        audio.addEventListener('stalled', () => {
-            if (userIntentPlay) {
-                log("Flusso stallato. Rete debole.");
-                updateStatus("Buffering...", "#ffa500");
-            }
-        });
-
-        audio.addEventListener('waiting', () => {
-            if (userIntentPlay) {
-                log("In attesa di dati dal server...");
-                updateStatus("Buffering...", "#ffa500");
-            }
-        });
-
-        // 3. Errore critico di rete (disconnessione totale o cambio IP)
-        audio.addEventListener('error', (e) => {
-            if (userIntentPlay) {
-                log(`Errore di rete critico (Codice: ${audio.error ? audio.error.code : 'Sconosciuto'}).`);
-                updateStatus("Riconnessione in corso...", "#ff0000");
-                
-                // Evita loop infiniti troppo veloci
-                clearTimeout(reconnectTimer);
-                reconnectTimer = setTimeout(() => {
-                    log("Tento la riconnessione forzata...");
-                    playStream();
-                }, 3000); // Riprova dopo 3 secondi
-            }
-        });
-
-        // 4. Ripresa della connessione
-        audio.addEventListener('playing', () => {
-            isPlaying = true;
-            updateStatus("In riproduzione", "#00ff00");
-            log("Flusso stabile.");
-        });
-
-    </script>
-</body>
-</html>
+        .play-btn:active {
+            transform: scale(0.92);
