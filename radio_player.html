@@ -22,11 +22,10 @@
             overflow: hidden;
         }
 
-        /* Fascetta stile TuneIn totalmente bianca */
         .player-bar {
             width: 100%;
             height: 100%;
-            padding: 0 15px 0 0; /* Il logo tocca perfettamente il bordo sinistro */
+            padding: 0 15px 0 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -34,7 +33,6 @@
             background: #ffffff !important;
         }
 
-        /* Area Logo a perimetro intero (altezza 100% del player) */
         .logo-box {
             width: 80px;  
             height: 100%; 
@@ -53,7 +51,6 @@
             object-fit: cover;
         }
 
-        /* Area Testi Centrale con giustificazione a sinistra vicino al logo */
         .info-box {
             flex-grow: 1;
             min-width: 0;
@@ -72,7 +69,6 @@
             text-align: left;
         }
 
-        /* Il wrapper che si muoverà SOLO se serve */
         .scroll-wrapper {
             display: inline-flex;
             align-items: center;
@@ -101,7 +97,6 @@
             padding-right: 0;
         }
 
-        /* L'animazione si attiva solo tramite questa classe JS */
         .is-scrolling {
             animation: marquee 12s linear infinite;
         }
@@ -111,7 +106,6 @@
             100% { transform: translate3d(-50%, 0, 0); }
         }
 
-        /* Controlli e Stato a Destra */
         .actions-box {
             display: flex;
             align-items: center;
@@ -144,7 +138,15 @@
             fill: currentColor;
         }
 
-        /* Badge LIVE Rosso Fisso */
+        /* Animazione per l'icona di caricamento */
+        @keyframes spin-anim {
+            100% { transform: rotate(360deg); }
+        }
+        .spin {
+            animation: spin-anim 1s linear infinite;
+            transform-origin: center;
+        }
+
         .status-badge {
             font-size: 0.65rem;
             padding: 4px 8px;
@@ -153,7 +155,8 @@
             letter-spacing: 0.5px;
             text-align: center;
             color: #ffffff;
-            background: #e53e3e;
+            background: #555555;
+            transition: background-color 0.3s ease;
         }
     </style>
 </head>
@@ -178,19 +181,20 @@
         </div>
 
         <div class="actions-box">
-            <div class="status-badge" id="statusTag">LIVE</div>
+            <div class="status-badge" id="statusTag">STOP</div>
             <button class="play-btn" id="playBtn" aria-label="Riproduci">
                 <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
         </div>
     </div>
 
-    <audio id="audioStream" crossorigin="anonymous" preload="none" src="https://a11.asurahosting.com:8610/radio.mp3"></audio>
+    <audio id="audioStream" crossorigin="anonymous" preload="none"></audio>
 
     <script>
         const audio = document.getElementById('audioStream');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
+        const statusTag = document.getElementById('statusTag');
 
         const titleContainer = document.getElementById('title-container');
         const titleWrapper = document.getElementById('title-wrapper');
@@ -202,8 +206,12 @@
 
         const playSVG = '<path d="M8 5v14l11-7z"/>';
         const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        const spinnerSVG = '<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>';
 
         let wakeLock = null;
+        let userIntentPlay = false;
+        let reconnectTimer = null;
+        const STREAM_URL = "https://a11.asurahosting.com:8610/radio.mp3";
 
         function applySmartMarquee(container, wrapper, item, originalText) {
             wrapper.classList.remove('is-scrolling');
@@ -261,37 +269,112 @@
             }
         }
 
+        function setStatus(text, color) {
+            statusTag.innerText = text;
+            statusTag.style.background = color;
+        }
+
+        function setUIState(state) {
+            if (state === 'loading') {
+                playIcon.innerHTML = spinnerSVG;
+                playIcon.classList.add('spin');
+                playBtn.style.pointerEvents = 'none';
+                setStatus("WAIT", "#ffa500");
+            } else if (state === 'playing') {
+                playIcon.innerHTML = pauseSVG;
+                playIcon.classList.remove('spin');
+                playBtn.style.pointerEvents = 'auto';
+                setStatus("LIVE", "#e53e3e");
+            } else if (state === 'stopped') {
+                playIcon.innerHTML = playSVG;
+                playIcon.classList.remove('spin');
+                playBtn.style.pointerEvents = 'auto';
+                setStatus("STOP", "#555555");
+            }
+        }
+
+        function hardStop() {
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+        }
+
+        function forceReconnect() {
+            if (!userIntentPlay) return;
+            setUIState('loading');
+            hardStop();
+            audio.src = `${STREAM_URL}?t=${Date.now()}`;
+            audio.play().catch(() => {
+                reconnectTimer = setTimeout(forceReconnect, 3000);
+            });
+        }
+
         function togglePlay() {
-            if (audio.paused) {
-                // Metodo nativo standard privo di manipolazioni di stringhe URL
+            if (!userIntentPlay) {
+                userIntentPlay = true;
+                setUIState('loading');
+                audio.src = `${STREAM_URL}?t=${Date.now()}`;
                 audio.play()
                     .then(() => {
-                        playIcon.innerHTML = pauseSVG;
                         requestWakeLock();
                         updateMediaSession();
                     })
-                    .catch(err => console.log("Riproduzione bloccata o intercettata"));
+                    .catch(err => {
+                        console.log("Riproduzione bloccata");
+                        userIntentPlay = false;
+                        setUIState('stopped');
+                    });
             } else {
-                audio.pause();
-                // Sgancia la cache interna del flusso per Firefox e riallinea alla diretta reale al prossimo play
-                audio.currentTime = 0;
-                playIcon.innerHTML = playSVG;
+                userIntentPlay = false;
+                clearTimeout(reconnectTimer);
+                hardStop();
+                setUIState('stopped');
                 releaseWakeLock();
             }
         }
 
         playBtn.addEventListener('click', togglePlay);
 
+        // --- GESTIONE ERRORI E RETE ---
+        audio.addEventListener('error', () => {
+            if (userIntentPlay) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(forceReconnect, 2000);
+            }
+        });
+
+        audio.addEventListener('waiting', () => {
+            if (userIntentPlay) setUIState('loading');
+        });
+
+        audio.addEventListener('stalled', () => {
+            if (userIntentPlay) {
+                setUIState('loading');
+                // Hard reset se il buffer si blocca su dati vecchi
+                clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(forceReconnect, 4000);
+            }
+        });
+
+        audio.addEventListener('playing', () => {
+            if (userIntentPlay) {
+                clearTimeout(reconnectTimer);
+                setUIState('playing');
+            }
+        });
+
+        // Gestione disconnessione Bluetooth o interruzioni di sistema
+        audio.addEventListener('pause', () => {
+            if (userIntentPlay && audio.readyState > 0) {
+                userIntentPlay = false;
+                clearTimeout(reconnectTimer);
+                hardStop();
+                setUIState('stopped');
+            }
+        });
+
         window.addEventListener('DOMContentLoaded', () => {
             checkMarquees();
-
-            const startOnInteraction = () => {
-                togglePlay();
-                document.removeEventListener('click', startOnInteraction);
-                document.removeEventListener('touchstart', startOnInteraction);
-            };
-            document.addEventListener('click', startOnInteraction);
-            document.addEventListener('touchstart', startOnInteraction);
         });
 
         window.addEventListener('resize', checkMarquees);
