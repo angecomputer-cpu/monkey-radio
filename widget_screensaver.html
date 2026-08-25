@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Radio - Screensaver Player</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f8cd18; /* Giallo Ocra Monkey */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        .monkey-stage {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f8cd18;
+            overflow: hidden;
+        }
+
+        /* VIDEO BACKGROUND FULLSCREEN */
+        .monkey-stage video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        /* OVERLAY VIGNETTE SUL GIALLO MONKEY */
+        .yellow-vignette {
+            position: absolute;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(248, 205, 24, 0.4) 100%),
+                        linear-gradient(to top, rgba(248, 205, 24, 0.85) 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* WIDGET FLUTTUANTE SOTTO */
+        .screensaver-info {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            pointer-events: none;
+            background: rgba(248, 205, 24, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(17, 17, 17, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .cover-wrapper {
+            width: 85px;
+            height: 85px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+            border: 2px solid #111111;
+            flex-shrink: 0;
+            background: #f8cd18;
+        }
+
+        .cover-img {
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .cover-hidden { transform: translateY(115%); }
+        .cover-visible { transform: translateY(0); }
+
+        .text-stage {
+            flex-grow: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .header-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* BADGE LIVE ROSSO CON LAMPEGGO PULITO (NO MOLLA/SCALE) */
+        .badge-live {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #ffffff;
+            background-color: #ff0000;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            animation: cleanBlink 1.2s infinite ease-in-out;
+        }
+
+        @keyframes cleanBlink {
+            0% { opacity: 1; }
+            50% { opacity: 0.25; }
+            100% { opacity: 1; }
+        }
+
+        .show-logo-img {
+            height: 18px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .song-metadata {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .ticker-box {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-wrapper {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .track-artist {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #333333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .track-title {
+            font-size: 1.10rem;
+            font-weight: 900;
+            color: #111111;
+        }
+
+        .is-scrolling {
+            animation: ssMarquee 10s linear infinite;
+        }
+
+        @keyframes ssMarquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        @media (max-width: 600px) {
+            .screensaver-info { bottom: 15px; left: 15px; right: 15px; padding: 10px; gap: 12px; }
+            .cover-wrapper { width: 65px; height: 65px; }
+            .track-title { font-size: 0.95rem; }
+            .track-artist { font-size: 0.75rem; }
+            .show-logo-img { height: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="monkey-stage">
+        <!-- VIDEO BACKGROUND -->
+        <video id="monkeyVideo" autoplay muted playsinline loop crossorigin="anonymous"></video>
+        
+        <!-- OVERLAY VIGNETTE -->
+        <div class="yellow-vignette"></div>
+
+        <!-- WIDGET SOTTO -->
+        <div class="screensaver-info">
+            <div class="cover-wrapper">
+                <img id="cover-a" class="cover-img cover-visible" src="https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png" alt="Cover A">
+                <img id="cover-b" class="cover-img cover-hidden" src="" alt="Cover B">
+            </div>
+
+            <div class="text-stage">
+                <div class="header-line">
+                    <span class="badge-live">NOW LIVE ON</span>
+                    <img id="show-logo" class="show-logo-img" src="" alt="Show Logo">
+                </div>
+
+                <div class="song-metadata">
+                    <div class="ticker-box" id="artist-container">
+                        <div class="ticker-wrapper" id="artist-wrapper">
+                            <span class="track-artist" id="main-artist-text">Monkey Radio</span>
+                        </div>
+                    </div>
+                    <div class="ticker-box" id="title-container">
+                        <div class="ticker-wrapper" id="title-wrapper">
+                            <span class="track-title" id="main-title-text">Diretta Streaming</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const video = document.getElementById('monkeyVideo');
+        const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
+        const DEFAULT_COVER = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
+
+        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
+        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png";
+        const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio.png";
+
+        const coverA = document.getElementById('cover-a');
+        const coverB = document.getElementById('cover-b');
+        let activeCover = 'A';
+
+        const showLogo = document.getElementById('show-logo');
+        const artistContainer = document.getElementById('artist-container');
+        const artistWrapper = document.getElementById('artist-wrapper');
+
+        const titleContainer = document.getElementById('title-container');
+        const titleWrapper = document.getElementById('title-wrapper');
+
+        let currentRawInfo = "";
+
+        function getRomeHour() {
+            return parseInt(new Intl.DateTimeFormat('it-IT', {
+                hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
+            }).format(new Date()));
+        }
+
+        function updateShowSchedule() {
+            const hour = getRomeHour();
+
+            const baseUrl = "https://archive.org/download/output_everyday_video/";
+            const newCertifiedLink = "https://ia902908.us.archive.org/18/items/2026-02-12-15-29-20-muto/2026-02-12%2015-29-20_muto.mp4";
+
+            let targetVideo = baseUrl + "output_everyday_video.mp4";
+            let targetLogo = LOGO_EVERYDAY;
+
+            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
+                targetVideo = baseUrl + "output_archive_video.mp4";
+                targetLogo = LOGO_ARCHIVE;
+            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
+                targetVideo = newCertifiedLink;
+                targetLogo = LOGO_CERTIFIED;
+            }
+
+            if (!video.src.includes(targetVideo)) {
+                video.src = targetVideo;
+                video.load();
+                const p = video.play();
+                if (p !== undefined) p.catch(() => { video.muted = true; video.play(); });
+            }
+
+            if (showLogo.src !== targetLogo) {
+                showLogo.src = targetLogo;
+            }
+        }
+
+        function swapCover(newUrl) {
+            const incomingUrl = newUrl || DEFAULT_COVER;
+            if (activeCover === 'A') {
+                coverB.src = incomingUrl;
+                coverA.classList.replace('cover-visible', 'cover-hidden'); 
+                coverB.classList.replace('cover-hidden', 'cover-visible'); 
+                activeCover = 'B';
+            } else {
+                coverA.src = incomingUrl;
+                coverB.classList.replace('cover-visible', 'cover-hidden'); 
+                coverA.classList.replace('cover-hidden', 'cover-visible'); 
+                activeCover = 'A';
+            }
+        }
+
+        function applyTextAndMarquee(wrapper, container, text, textClass) {
+            wrapper.classList.remove('is-scrolling');
+            wrapper.innerHTML = '';
+
+            const item = document.createElement('span');
+            item.className = textClass;
+            item.textContent = text;
+            wrapper.appendChild(item);
+
+            if (item.offsetWidth > container.offsetWidth) {
+                item.textContent = text + '  •  ';
+                item.style.paddingRight = "20px";
+                wrapper.appendChild(item.cloneNode(true));
+                wrapper.classList.add('is-scrolling');
+            }
+        }
+
+        async function fetchSongData() {
+            try {
+                const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
+                if (!res.ok) return;
+                const data = await res.json();
+                let rawInfo = "Monkey Radio - Diretta Streaming";
+                if (data.icestats && data.icestats.source) {
+                    const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+                    const mount = sources.find(m => m.listenurl && m.listenurl.includes("/radio.mp3"));
+                    if (mount && mount.title) rawInfo = mount.title;
+                }
+
+                if (rawInfo !== currentRawInfo) {
+                    currentRawInfo = rawInfo;
+                    await processNewSong(rawInfo);
+                }
+            } catch (err) {}
+        }
+
+        async function processNewSong(rawInfo) {
+            let artist = "Monkey Radio";
+            let title = rawInfo;
+
+            if (rawInfo.includes(" - ")) {
+                const parts = rawInfo.split(" - ");
+                artist = parts[0].trim();
+                title = parts.slice(1).join(" - ").trim();
+            }
+
+            applyTextAndMarquee(artistWrapper, artistContainer, artist, 'track-artist');
+            applyTextAndMarquee(titleWrapper, titleContainer, title, 'track-title');
+
+            let coverUrl = null;
+            if (rawInfo !== "Monkey Radio - Diretta Streaming") {
+                try {
+                    const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawInfo)}&entity=song&limit=1`);
+                    const itunesData = await itunesRes.json();
+                    if (itunesData.results && itunesData.results.length > 0) {
+                        coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
+                    }
+                } catch (e) {}
+            }
+            swapCover(coverUrl);
+        }
+
+        updateShowSchedule();
+        setInterval(updateShowSchedule, 60000);
+        setInterval(fetchSongData, 10000);
+        fetchSongData();
+    })();
+    </script>
+</body>
+</html>
