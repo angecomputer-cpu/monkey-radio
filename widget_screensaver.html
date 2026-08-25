@@ -28,15 +28,15 @@
             overflow: hidden;
         }
 
-        /* CONTAINER YOUTUBE FULLSCREEN PIÙ TRASPARENTE */
+        /* CONTAINER YOUTUBE FULLSCREEN TRASPARENTE */
         .youtube-bg-wrapper {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* 16:9 ratio */
+            height: 56.25vw;
             min-height: 100vh;
-            min-width: 177.77vh; /* 16:9 ratio */
+            min-width: 177.77vh;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 1;
@@ -46,10 +46,10 @@
             width: 100%;
             height: 100%;
             border: none;
-            opacity: 0.45; /* Reso più trasparente come richiesto */
+            opacity: 0.45;
         }
 
-        /* OVERLAY SCURO MOLTO LEGGERO PER NON COPRIRE IL VIDEO */
+        /* OVERLAY SCURO LEGGERO */
         .brand-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -59,7 +59,7 @@
             z-index: 2;
         }
 
-        /* BOX PRINCIPALE FULLSCREEN CON TRASPARENZA MAGGIORE E BLUR RIDOTTO */
+        /* BOX PRINCIPALE FULLSCREEN */
         .screensaver-info {
             position: absolute;
             top: 0;
@@ -70,6 +70,41 @@
             background: rgba(15, 15, 15, 0.25);
             backdrop-filter: blur(4px);
             overflow: hidden;
+        }
+
+        /* PULSANTE FULLSCREEN IN BASSO A DESTRA */
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            z-index: 999;
+            background: rgba(20, 20, 20, 0.6);
+            border: 2px solid #f8cd18;
+            color: #f8cd18;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            transition: all 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .fullscreen-btn:hover {
+            background: #f8cd18;
+            color: #0d0d0d;
+            transform: scale(1.08);
+            box-shadow: 0 10px 25px rgba(248, 205, 24, 0.4);
+        }
+
+        .fullscreen-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
         }
 
         /* SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO */
@@ -93,7 +128,6 @@
             opacity: 0;
         }
 
-        /* MASCHERA REVEAL LOGO SHOW: DA DESTRA A SINISTRA */
         .show-logo-mask {
             height: 55vh;
             width: 35vw;
@@ -116,7 +150,6 @@
             object-fit: contain;
         }
 
-        /* STRUTTURA TESTO SCENA 1 */
         .live-text-block {
             width: 100%;
             display: flex;
@@ -164,7 +197,6 @@
             to { transform: translateX(0); }
         }
 
-        /* BADGE LIVE ROSSO LAMPEGGIANTE */
         .badge-live-flash {
             font-size: 1.8vw;
             font-weight: 900;
@@ -185,14 +217,13 @@
         .row-station-name {
             font-size: 3.8vw;
             font-weight: 900;
-            color: #f8cd18; /* GIALLO MONKEY RADIO */
+            color: #f8cd18;
             text-transform: uppercase;
             letter-spacing: 2px;
             white-space: nowrap;
             text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
         }
 
-        /* LETTERING REVEAL */
         .char-reveal {
             display: inline-block;
             opacity: 0;
@@ -257,6 +288,7 @@
             text-align: left;
             padding-left: 3vw;
             padding-right: 2vw;
+            overflow: hidden;
         }
 
         .badge-live-mini {
@@ -272,11 +304,22 @@
             animation: liveBlink 1.2s infinite ease-in-out;
         }
 
-        .artist-line, .title-line {
+        .artist-line-wrapper, .title-line-wrapper {
             width: 100%;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            overflow: hidden;
+            position: relative;
+            white-space: nowrap;
             text-align: left;
+            margin-bottom: 8px;
+        }
+
+        .title-line-wrapper {
+            margin-bottom: 0;
+        }
+
+        .track-artist, .track-title {
+            display: inline-block;
+            white-space: nowrap;
         }
 
         .track-artist {
@@ -286,7 +329,6 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             line-height: 1.25;
-            margin-bottom: 8px;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
         }
 
@@ -297,6 +339,15 @@
             line-height: 1.15;
             letter-spacing: -0.5px;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+        }
+
+        .is-overflowing {
+            animation: marqueeScroll 12s linear infinite;
+        }
+
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         @media (max-width: 768px) {
@@ -312,17 +363,18 @@
             .row-station-name { font-size: 5vw; }
             .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
             .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .artist-line, .title-line { text-align: center; }
+            .artist-line-wrapper, .title-line-wrapper { text-align: center; }
             .track-artist { font-size: 3.5vw; }
             .track-title { font-size: 5vw; }
             .badge-live-mini { font-size: 2.8vw; padding: 4px 12px; }
+            .fullscreen-btn { bottom: 15px; right: 15px; width: 42px; height: 42px; }
         }
     </style>
 </head>
 <body>
 
     <div class="monkey-stage">
-        <!-- YOUTUBE VIDEO BACKGROUND AGGIORNATO (AUTOSTART, NO AUDIO, LOOP, ID CLVB4yj1vks) -->
+        <!-- YOUTUBE VIDEO BACKGROUND -->
         <div class="youtube-bg-wrapper">
             <iframe src="https://www.youtube.com/embed/clVB4yj1vks?autoplay=1&mute=1&controls=0&loop=1&playlist=clVB4yj1vks&enablejsapi=1&rel=0&showinfo=0" 
                     allow="autoplay; encrypted-media" 
@@ -356,15 +408,26 @@
             <!-- SCENA 2: COVER & TRACK INFO -->
             <div id="sceneTrack" class="scene-track">
                 <div class="cover-wrapper">
-                    <img id="trackCover" class="cover-img" src="https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png" alt="Cover">
+                    <img id="trackCover" class="cover-img" src="" alt="Cover">
                 </div>
                 <div class="track-metadata">
                     <span class="badge-live-mini">NOW ON AIR</span>
-                    <div class="artist-line track-artist" id="artistContainer"></div>
-                    <div class="title-line track-title" id="titleContainer"></div>
+                    <div class="artist-line-wrapper" id="artistWrapper">
+                        <div class="track-artist" id="artistContainer"></div>
+                    </div>
+                    <div class="title-line-wrapper" id="titleWrapper">
+                        <div class="track-title" id="titleContainer"></div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- PULSANTE FULLSCREEN / EXIT FULLSCREEN (IN BASSO A DESTRA) -->
+        <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
+            <svg id="fsIcon" viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
     </div>
 
     <script>
@@ -381,12 +444,46 @@
         const showLogo = document.getElementById('showLogo');
         const stationNameContainer = document.getElementById('stationNameContainer');
         const trackCover = document.getElementById('trackCover');
+        
+        const artistWrapper = document.getElementById('artistWrapper');
         const artistContainer = document.getElementById('artistContainer');
+        const titleWrapper = document.getElementById('titleWrapper');
         const titleContainer = document.getElementById('titleContainer');
+
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fsIcon = document.getElementById('fsIcon');
 
         let currentRawInfo = "";
         let currentArtist = "";
         let currentTitle = "";
+
+        // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
+        const icons = {
+            enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
+            exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
+        };
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error("Errore nell'attivare il fullscreen:", err);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fsIcon.innerHTML = `<path d="${icons.exit}"/>`;
+                fullscreenBtn.setAttribute('title', 'Esci da Schermo Intero');
+            } else {
+                fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
+                fullscreenBtn.setAttribute('title', 'Attiva Schermo Intero');
+            }
+        });
 
         function getRomeHour() {
             return parseInt(new Intl.DateTimeFormat('it-IT', {
@@ -421,6 +518,23 @@
             });
         }
 
+        function checkAndApplyMarquee(wrapper, innerElement) {
+            innerElement.classList.remove('is-overflowing');
+            const clones = wrapper.querySelectorAll('.marquee-clone');
+            clones.forEach(c => c.remove());
+
+            setTimeout(() => {
+                if (innerElement.scrollWidth > wrapper.clientWidth) {
+                    innerElement.classList.add('is-overflowing');
+                    const clone = innerElement.cloneNode(true);
+                    clone.classList.remove('is-overflowing');
+                    clone.classList.add('marquee-clone');
+                    clone.style.marginLeft = '40px';
+                    wrapper.appendChild(clone);
+                }
+            }, 500);
+        }
+
         function triggerShowScene() {
             sceneTrack.classList.remove('slide-in');
             sceneShow.classList.remove('slide-out');
@@ -428,12 +542,15 @@
         }
 
         function triggerTrackScene(artist, title, coverUrl) {
-            trackCover.src = coverUrl || DEFAULT_COVER;
+            trackCover.src = coverUrl || LOGO_ARCHIVE;
             sceneShow.classList.add('slide-out');
             sceneTrack.classList.add('slide-in');
 
-            typeWriterText(artistContainer, artist, 0.4);
-            typeWriterText(titleContainer, title, 0.7);
+            artistContainer.innerText = artist;
+            titleContainer.innerText = title;
+
+            checkAndApplyMarquee(artistWrapper, artistContainer);
+            checkAndApplyMarquee(titleWrapper, titleContainer);
         }
 
         async function fetchSongData() {
@@ -458,11 +575,16 @@
         async function processNewSong(rawInfo) {
             let artist = "Monkey Radio";
             let title = rawInfo;
+            let coverUrl = null;
 
-            if (rawInfo.includes(" - ")) {
+            const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Diretta Streaming" || !rawInfo.includes(" - "));
+
+            if (!isGenericStream) {
                 const parts = rawInfo.split(" - ");
                 artist = parts[0].trim();
                 title = parts.slice(1).join(" - ").trim();
+            } else {
+                title = "Diretta Streaming";
             }
 
             if (artist === currentArtist && title === currentTitle) {
@@ -472,8 +594,7 @@
             currentArtist = artist;
             currentTitle = title;
 
-            let coverUrl = null;
-            if (rawInfo !== "Monkey Radio - Diretta Streaming") {
+            if (!isGenericStream) {
                 try {
                     const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawInfo)}&entity=song&limit=1`);
                     const itunesData = await itunesRes.json();
@@ -481,6 +602,8 @@
                         coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
                     }
                 } catch (e) {}
+            } else {
+                coverUrl = LOGO_ARCHIVE;
             }
 
             triggerShowScene();
