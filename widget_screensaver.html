@@ -268,8 +268,9 @@
             text-align: left;
         }
 
+        /* QUESTE SONO LE CLASSI CHE ORA HO APPLICATO CORRETTAMENTE ALL'HTML! */
         .track-artist {
-            font-size: 3.5vw;
+            font-size: 4vw; /* ENORME */
             font-weight: 800;
             color: #222222;
             text-transform: uppercase;
@@ -279,7 +280,7 @@
         }
 
         .track-title {
-            font-size: 5.5vw;
+            font-size: 7vw; /* GIGANTESCO */
             font-weight: 900;
             color: #111111;
             line-height: 1.1;
@@ -300,8 +301,8 @@
             .cover-wrapper { width: 38vh; height: 38vh; max-width: 75vw; }
             .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
             .artist-line, .title-line { text-align: center; }
-            .track-artist { font-size: 5vw; }
-            .track-title { font-size: 7.5vw; }
+            .track-artist { font-size: 6vw; }
+            .track-title { font-size: 9vw; }
             .badge-live-mini { font-size: 3.5vw; padding: 6px 14px; }
         }
     </style>
@@ -342,8 +343,9 @@
                 </div>
                 <div class="track-metadata">
                     <span class="badge-live-mini">NOW ON AIR</span>
-                    <div class="artist-line" id="artistContainer"></div>
-                    <div class="title-line" id="titleContainer"></div>
+                    <!-- LE CLASSI CSS SONO STATE AGGIUNTE QUI -->
+                    <div class="artist-line track-artist" id="artistContainer"></div>
+                    <div class="title-line track-title" id="titleContainer"></div>
                 </div>
             </div>
         </div>
@@ -466,7 +468,6 @@
                 title = parts.slice(1).join(" - ").trim();
             }
 
-            // SE IL BRANO NON È CAMBIATO, NON RE-TRIGGERARE L'ANIMAZIONE
             if (artist === currentArtist && title === currentTitle) {
                 return;
             }
