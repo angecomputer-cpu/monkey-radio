@@ -68,7 +68,7 @@
             position: absolute;
             inset: 0;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 40vw 60vw;
             align-items: center;
             justify-items: center;
             padding: 0 4vw;
@@ -84,19 +84,19 @@
             opacity: 0;
         }
 
-        /* MASCHERA PER REVEAL LOGO SHOW */
+        /* MASCHERA REVEAL LOGO SHOW: DA DESTRA A SINISTRA */
         .show-logo-mask {
             height: 55vh;
-            width: 38vw;
+            width: 35vw;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
-            animation: maskReveal 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.3s;
+            clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+            animation: maskRevealRightToLeft 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
 
-        @keyframes maskReveal {
+        @keyframes maskRevealRightToLeft {
             to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
         }
 
@@ -113,14 +113,15 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            gap: 1.5vh;
+            gap: 2vh;
+            padding-left: 2vw;
         }
 
         .row-live-now {
             display: flex;
             align-items: center;
-            gap: 1.2vw;
-            font-size: 3vw;
+            gap: 1.5vw;
+            font-size: 3.5vw;
             font-weight: 900;
             color: #111111;
             text-transform: uppercase;
@@ -136,13 +137,13 @@
         .slide-from-left {
             display: inline-block;
             transform: translateX(-100%);
-            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.4s;
+            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
         }
 
         .slide-from-right {
             display: inline-block;
             transform: translateX(100%);
-            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.4s;
+            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
         }
 
         @keyframes slideInLeft {
@@ -155,12 +156,12 @@
 
         /* BADGE LIVE ROSSO LAMPEGGIANTE */
         .badge-live-flash {
-            font-size: 2.2vw;
+            font-size: 2.5vw;
             font-weight: 900;
             color: #ffffff;
             background-color: #ff0000;
-            padding: 4px 18px;
-            border-radius: 10px;
+            padding: 4px 22px;
+            border-radius: 12px;
             letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
             animation: liveBlink 1s infinite ease-in-out;
@@ -172,7 +173,7 @@
         }
 
         .row-station-name {
-            font-size: 4.2vw;
+            font-size: 5vw;
             font-weight: 900;
             color: #111111;
             text-transform: uppercase;
@@ -195,12 +196,12 @@
             }
         }
 
-        /* SCENA 2: COVER & TRACK INFO (GRID 2 COLONNE) */
+        /* SCENA 2: COVER & TRACK INFO (GRID 2 COLONNE: 35vw cover, 65vw text) */
         .scene-track {
             position: absolute;
             inset: 0;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 35vw 65vw;
             align-items: center;
             justify-items: center;
             padding: 0 4vw;
@@ -217,17 +218,17 @@
         }
 
         .cover-wrapper {
-            width: 52vh;
-            height: 52vh;
-            max-width: 38vw;
+            width: 48vh;
+            height: 48vh;
+            max-width: 32vw;
             position: relative;
             border-radius: 28px;
             overflow: hidden;
-            border: 5px solid #111111;
+            border: 6px solid #111111;
             background: #f8cd18;
             box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-            clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
-            animation: maskReveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
+            clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+            animation: maskRevealRightToLeft 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
 
         .cover-img {
@@ -243,46 +244,46 @@
             justify-content: center;
             align-items: flex-start;
             text-align: left;
-            overflow: hidden;
+            padding-left: 3vw;
             padding-right: 2vw;
         }
 
         .badge-live-mini {
-            font-size: 1.3vw;
+            font-size: 1.6vw;
             font-weight: 900;
             color: #ffffff;
             background-color: #ff0000;
-            padding: 8px 20px;
+            padding: 8px 24px;
             border-radius: 12px;
             letter-spacing: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
             animation: liveBlink 1.2s infinite ease-in-out;
         }
 
         .artist-line, .title-line {
             width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             text-align: left;
         }
 
         .track-artist {
-            font-size: 2.5vw;
+            font-size: 3.5vw;
             font-weight: 800;
             color: #222222;
             text-transform: uppercase;
             letter-spacing: 1px;
-            line-height: 1.2;
-            margin-bottom: 8px;
+            line-height: 1.25;
+            margin-bottom: 12px;
         }
 
         .track-title {
-            font-size: 4.8vw;
+            font-size: 5.5vw;
             font-weight: 900;
             color: #111111;
             line-height: 1.1;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
         }
 
         @media (max-width: 768px) {
@@ -292,15 +293,15 @@
                 padding: 4vh 2vw;
             }
             .show-logo-mask { width: 80vw; height: 35vh; }
-            .live-text-block { align-items: center; text-align: center; }
+            .live-text-block { align-items: center; text-align: center; padding-left: 0; }
             .row-live-now { font-size: 5vw; gap: 2vw; }
             .badge-live-flash { font-size: 4vw; padding: 2px 10px; }
             .row-station-name { font-size: 6.5vw; }
             .cover-wrapper { width: 38vh; height: 38vh; max-width: 75vw; }
-            .track-metadata { align-items: center; text-align: center; padding-right: 0; }
+            .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
             .artist-line, .title-line { text-align: center; }
-            .track-artist { font-size: 4.5vw; }
-            .track-title { font-size: 7vw; }
+            .track-artist { font-size: 5vw; }
+            .track-title { font-size: 7.5vw; }
             .badge-live-mini { font-size: 3.5vw; padding: 6px 14px; }
         }
     </style>
@@ -367,6 +368,8 @@
         const titleContainer = document.getElementById('titleContainer');
 
         let currentRawInfo = "";
+        let currentArtist = "";
+        let currentTitle = "";
         let isTrackSceneActive = false;
 
         function getRomeHour() {
@@ -420,7 +423,7 @@
             sceneTrack.classList.remove('slide-in');
             sceneShow.classList.remove('slide-out');
             
-            typeWriterText(stationNameContainer, "MONKEY RADIO", 0.6);
+            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
         }
 
         function triggerTrackScene(artist, title, coverUrl) {
@@ -463,6 +466,14 @@
                 title = parts.slice(1).join(" - ").trim();
             }
 
+            // SE IL BRANO NON È CAMBIATO, NON RE-TRIGGERARE L'ANIMAZIONE
+            if (artist === currentArtist && title === currentTitle) {
+                return;
+            }
+
+            currentArtist = artist;
+            currentTitle = title;
+
             let coverUrl = null;
             if (rawInfo !== "Monkey Radio - Diretta Streaming") {
                 try {
@@ -484,18 +495,11 @@
         setInterval(updateShowSchedule, 60000);
 
         setInterval(() => {
-            if (currentRawInfo) {
+            if (currentArtist && currentTitle) {
                 if (isTrackSceneActive) {
                     triggerShowScene();
                 } else {
-                    let artist = "Monkey Radio";
-                    let title = currentRawInfo;
-                    if (currentRawInfo.includes(" - ")) {
-                        const parts = currentRawInfo.split(" - ");
-                        artist = parts[0].trim();
-                        title = parts.slice(1).join(" - ").trim();
-                    }
-                    triggerTrackScene(artist, title, trackCover.src);
+                    triggerTrackScene(currentArtist, currentTitle, trackCover.src);
                 }
             }
         }, 10000);
