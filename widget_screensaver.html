@@ -15,7 +15,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #f8cd18;
+            background-color: #0d0d0d;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             user-select: none;
         }
@@ -24,28 +24,37 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background-color: #f8cd18;
+            background-color: #0d0d0d;
             overflow: hidden;
         }
 
-        /* VIDEO BACKGROUND FULLSCREEN */
-        .monkey-stage video {
+        /* CONTAINER YOUTUBE FULLSCREEN (CON OVERFLOW PER NASCONDERE BORDI E LOGHI) */
+        .youtube-bg-wrapper {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            opacity: 0.85;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            min-height: 100vh;
+            min-width: 177.77vh; /* 16:9 ratio */
+            transform: translate(-50%, -50%);
+            pointer-events: none;
             z-index: 1;
         }
 
-        .yellow-vignette {
+        .youtube-bg-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            opacity: 0.75;
+        }
+
+        /* OVERLAY GIALLO-SCURO PER MANTENERE IL BRAND E CONTRASTO ELEVATO */
+        .brand-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 20%, rgba(248, 205, 24, 0.4) 100%),
-                        linear-gradient(to top, rgba(248, 205, 24, 0.85) 0%, transparent 50%);
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0.85) 100%),
+                        linear-gradient(to top, rgba(248, 205, 24, 0.15) 0%, transparent 60%);
             pointer-events: none;
             z-index: 2;
         }
@@ -58,8 +67,8 @@
             width: 100vw;
             height: 100vh;
             z-index: 10;
-            background: rgba(248, 205, 24, 0.45);
-            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.55);
+            backdrop-filter: blur(12px);
             overflow: hidden;
         }
 
@@ -94,6 +103,7 @@
             overflow: hidden;
             clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
             animation: maskRevealRightToLeft 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
         }
 
         @keyframes maskRevealRightToLeft {
@@ -106,7 +116,7 @@
             object-fit: contain;
         }
 
-        /* STRUTTURA TESTO SCENA 1 */
+        /* STRUTTURA TESTO SCENA 1 (CHIANTO/GIALLO SU SCURO) */
         .live-text-block {
             width: 100%;
             display: flex;
@@ -123,8 +133,9 @@
             gap: 1.5vw;
             font-size: 2.5vw;
             font-weight: 900;
-            color: #111111;
+            color: #ffffff;
             text-transform: uppercase;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
         }
 
         .box-slide-mask {
@@ -162,7 +173,7 @@
             padding: 4px 18px;
             border-radius: 10px;
             letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.7);
             animation: liveBlink 1s infinite ease-in-out;
         }
 
@@ -174,10 +185,11 @@
         .row-station-name {
             font-size: 3.8vw;
             font-weight: 900;
-            color: #111111;
+            color: #f8cd18; /* GIALLO MONKEY RADIO */
             text-transform: uppercase;
             letter-spacing: 2px;
             white-space: nowrap;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
         }
 
         /* LETTERING REVEAL */
@@ -223,9 +235,9 @@
             position: relative;
             border-radius: 24px;
             overflow: hidden;
-            border: 5px solid #111111;
-            background: #f8cd18;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 4px solid #f8cd18;
+            background: #111111;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
             clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
             animation: maskRevealRightToLeft 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
@@ -256,7 +268,7 @@
             border-radius: 10px;
             letter-spacing: 2px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
             animation: liveBlink 1.2s infinite ease-in-out;
         }
 
@@ -267,22 +279,25 @@
             text-align: left;
         }
 
+        /* RIVISTI I COLORI PER UNO SFONDO SCURO */
         .track-artist {
             font-size: 2vw;
             font-weight: 800;
-            color: #222222;
+            color: #f8cd18; /* GIALLO MONKEY */
             text-transform: uppercase;
             letter-spacing: 1px;
             line-height: 1.25;
             margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
         }
 
         .track-title {
             font-size: 3.2vw;
             font-weight: 900;
-            color: #111111;
+            color: #ffffff; /* BIANCO BRILLANTE */
             line-height: 1.15;
             letter-spacing: -0.5px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
         }
 
         @media (max-width: 768px) {
@@ -308,10 +323,15 @@
 <body>
 
     <div class="monkey-stage">
-        <!-- VIDEO BACKGROUND -->
-        <video id="monkeyVideo" autoplay muted playsinline loop crossorigin="anonymous"></video>
+        <!-- YOUTUBE PLAYLIST BACKGROUND (AUTOSTART, NO AUDIO, LOOP) -->
+        <div class="youtube-bg-wrapper">
+            <iframe src="https://www.youtube.com/embed/videoseries?list=PLVdLN4Yhy71fG-v-BRCn3GgRAG_UJWJxc&autoplay=1&mute=1&controls=0&loop=1&enablejsapi=1&rel=0&showinfo=0" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen>
+            </iframe>
+        </div>
         
-        <div class="yellow-vignette"></div>
+        <div class="brand-overlay"></div>
 
         <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
@@ -350,7 +370,6 @@
 
     <script>
     (function() {
-        const video = document.getElementById('monkeyVideo');
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
         const DEFAULT_COVER = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
 
@@ -376,27 +395,14 @@
             }).format(new Date()));
         }
 
-        function updateShowSchedule() {
+        function updateShowLogo() {
             const hour = getRomeHour();
-            const baseUrl = "https://archive.org/download/output_everyday_video/";
-            const newCertifiedLink = "https://ia902908.us.archive.org/18/items/2026-02-12-15-29-20-muto/2026-02-12%2015-29-20_muto.mp4";
-
-            let targetVideo = baseUrl + "output_everyday_video.mp4";
             let targetLogo = LOGO_EVERYDAY;
 
             if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                targetVideo = baseUrl + "output_archive_video.mp4";
                 targetLogo = LOGO_ARCHIVE;
             } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
-                targetVideo = newCertifiedLink;
                 targetLogo = LOGO_CERTIFIED;
-            }
-
-            if (!video.src.includes(targetVideo)) {
-                video.src = targetVideo;
-                video.load();
-                const p = video.play();
-                if (p !== undefined) p.catch(() => { video.muted = true; video.play(); });
             }
 
             if (showLogo.src !== targetLogo) {
@@ -460,7 +466,6 @@
                 title = parts.slice(1).join(" - ").trim();
             }
 
-            // SE IL BRANO È IDENTICO, FERMATI E NON RIGENERARE LE SCENE
             if (artist === currentArtist && title === currentTitle) {
                 return;
             }
@@ -479,15 +484,14 @@
                 } catch (e) {}
             }
 
-            // TRANSIZIONE SOLO QUANDO CAMBIA DAVVERO IL BRANO
             triggerShowScene();
             setTimeout(() => {
                 triggerTrackScene(artist, title, coverUrl);
             }, 4000);
         }
 
-        updateShowSchedule();
-        setInterval(updateShowSchedule, 60000);
+        updateShowLogo();
+        setInterval(updateShowLogo, 60000);
 
         fetchSongData();
         setInterval(fetchSongData, 15000);
