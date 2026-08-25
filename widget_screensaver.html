@@ -50,7 +50,7 @@
             z-index: 2;
         }
 
-        /* BOX PRINCIPALE 100% LARGHEZZA E ALTEZZA */
+        /* BOX PRINCIPALE FULLSCREEN */
         .screensaver-info {
             position: absolute;
             top: 0;
@@ -58,23 +58,20 @@
             width: 100vw;
             height: 100vh;
             z-index: 10;
-            background: rgba(248, 205, 24, 0.55);
+            background: rgba(248, 205, 24, 0.45);
             backdrop-filter: blur(8px);
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* SCENA 1: SHOW LOGO & NOW ON MONKEY RADIO (FULLSCREEN) */
+        /* SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO (GRID 2 COLONNE) */
         .scene-show {
             position: absolute;
             inset: 0;
-            padding: 5vw;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             align-items: center;
-            justify-content: center;
-            gap: 4vw;
+            justify-items: center;
+            padding: 0 4vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -87,17 +84,16 @@
             opacity: 0;
         }
 
-        /* MASCHERA PER REVEAL LOGO */
+        /* MASCHERA PER REVEAL LOGO SHOW */
         .show-logo-mask {
-            height: 40vh;
-            width: 35vw;
+            height: 55vh;
+            width: 38vw;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
             animation: maskReveal 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.3s;
-            flex-shrink: 0;
         }
 
         @keyframes maskReveal {
@@ -110,14 +106,77 @@
             object-fit: contain;
         }
 
-        .live-text-container {
+        /* STRUTTURA TESTO SCENA 1 */
+        .live-text-block {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 1.5vh;
+        }
+
+        .row-live-now {
             display: flex;
             align-items: center;
-            font-size: 3.5vw;
+            gap: 1.2vw;
+            font-size: 3vw;
             font-weight: 900;
             color: #111111;
-            letter-spacing: 2px;
             text-transform: uppercase;
+        }
+
+        /* BOX MASCHERATI PER ANIMAZIONE SLIDE IN DA SX E DX */
+        .box-slide-mask {
+            display: inline-block;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide-from-left {
+            display: inline-block;
+            transform: translateX(-100%);
+            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.4s;
+        }
+
+        .slide-from-right {
+            display: inline-block;
+            transform: translateX(100%);
+            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.4s;
+        }
+
+        @keyframes slideInLeft {
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            to { transform: translateX(0); }
+        }
+
+        /* BADGE LIVE ROSSO LAMPEGGIANTE */
+        .badge-live-flash {
+            font-size: 2.2vw;
+            font-weight: 900;
+            color: #ffffff;
+            background-color: #ff0000;
+            padding: 4px 18px;
+            border-radius: 10px;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            animation: liveBlink 1s infinite ease-in-out;
+        }
+
+        @keyframes liveBlink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.96); }
+        }
+
+        .row-station-name {
+            font-size: 4.2vw;
+            font-weight: 900;
+            color: #111111;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             white-space: nowrap;
         }
 
@@ -136,15 +195,15 @@
             }
         }
 
-        /* SCENA 2: COVER & TRACK INFO (FULLSCREEN) */
+        /* SCENA 2: COVER & TRACK INFO (GRID 2 COLONNE) */
         .scene-track {
             position: absolute;
             inset: 0;
-            padding: 5vw;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             align-items: center;
-            justify-content: center;
-            gap: 5vw;
+            justify-items: center;
+            padding: 0 4vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -158,17 +217,15 @@
         }
 
         .cover-wrapper {
-            width: 35vw;
-            height: 35vw;
-            max-width: 45vh;
-            max-height: 45vh;
+            width: 52vh;
+            height: 52vh;
+            max-width: 38vw;
             position: relative;
-            border-radius: 24px;
+            border-radius: 28px;
             overflow: hidden;
-            border: 4px solid #111111;
-            flex-shrink: 0;
+            border: 5px solid #111111;
             background: #f8cd18;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
             clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
             animation: maskReveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
@@ -180,31 +237,27 @@
         }
 
         .track-metadata {
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
             text-align: left;
-            flex-grow: 1;
-            max-width: 50vw;
             overflow: hidden;
+            padding-right: 2vw;
         }
 
         .badge-live-mini {
-            font-size: 1.2vw;
+            font-size: 1.3vw;
             font-weight: 900;
             color: #ffffff;
             background-color: #ff0000;
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 12px;
             letter-spacing: 2px;
-            margin-bottom: 12px;
-            animation: cleanBlink 1.2s infinite ease-in-out;
-        }
-
-        @keyframes cleanBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+            animation: liveBlink 1.2s infinite ease-in-out;
         }
 
         .artist-line, .title-line {
@@ -215,30 +268,40 @@
         }
 
         .track-artist {
-            font-size: 2vw;
-            font-weight: 700;
-            color: #333333;
+            font-size: 2.5vw;
+            font-weight: 800;
+            color: #222222;
             text-transform: uppercase;
             letter-spacing: 1px;
+            line-height: 1.2;
+            margin-bottom: 8px;
         }
 
         .track-title {
-            font-size: 3.5vw;
+            font-size: 4.8vw;
             font-weight: 900;
             color: #111111;
             line-height: 1.1;
+            letter-spacing: -0.5px;
         }
 
         @media (max-width: 768px) {
-            .scene-show, .scene-track { flex-direction: column; justify-content: center; gap: 3vh; }
-            .show-logo-mask { width: 70vw; height: 25vh; }
-            .live-text-container { font-size: 5vw; }
-            .cover-wrapper { width: 50vw; height: 50vw; }
-            .track-metadata { max-width: 85vw; align-items: center; text-align: center; }
+            .scene-show, .scene-track {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+                padding: 4vh 2vw;
+            }
+            .show-logo-mask { width: 80vw; height: 35vh; }
+            .live-text-block { align-items: center; text-align: center; }
+            .row-live-now { font-size: 5vw; gap: 2vw; }
+            .badge-live-flash { font-size: 4vw; padding: 2px 10px; }
+            .row-station-name { font-size: 6.5vw; }
+            .cover-wrapper { width: 38vh; height: 38vh; max-width: 75vw; }
+            .track-metadata { align-items: center; text-align: center; padding-right: 0; }
             .artist-line, .title-line { text-align: center; }
-            .track-artist { font-size: 4vw; }
-            .track-title { font-size: 6vw; }
-            .badge-live-mini { font-size: 3vw; }
+            .track-artist { font-size: 4.5vw; }
+            .track-title { font-size: 7vw; }
+            .badge-live-mini { font-size: 3.5vw; padding: 6px 14px; }
         }
     </style>
 </head>
@@ -252,12 +315,23 @@
 
         <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
-            <!-- SCENA 1: SHOW LOGO & NOW ON MONKEY RADIO -->
+            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
             <div id="sceneShow" class="scene-show">
                 <div class="show-logo-mask">
                     <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
                 </div>
-                <div id="liveText" class="live-text-container"></div>
+                <div class="live-text-block">
+                    <div class="row-live-now">
+                        <div class="box-slide-mask">
+                            <span class="slide-from-left">NOW</span>
+                        </div>
+                        <span class="badge-live-flash">LIVE</span>
+                        <div class="box-slide-mask">
+                            <span class="slide-from-right">ON</span>
+                        </div>
+                    </div>
+                    <div class="row-station-name" id="stationNameContainer"></div>
+                </div>
             </div>
 
             <!-- SCENA 2: COVER & TRACK INFO -->
@@ -287,7 +361,7 @@
         const sceneShow = document.getElementById('sceneShow');
         const sceneTrack = document.getElementById('sceneTrack');
         const showLogo = document.getElementById('showLogo');
-        const liveText = document.getElementById('liveText');
+        const stationNameContainer = document.getElementById('stationNameContainer');
         const trackCover = document.getElementById('trackCover');
         const artistContainer = document.getElementById('artistContainer');
         const titleContainer = document.getElementById('titleContainer');
@@ -346,7 +420,7 @@
             sceneTrack.classList.remove('slide-in');
             sceneShow.classList.remove('slide-out');
             
-            typeWriterText(liveText, "NOW ON MONKEY RADIO", 0.6);
+            typeWriterText(stationNameContainer, "MONKEY RADIO", 0.6);
         }
 
         function triggerTrackScene(artist, title, coverUrl) {
