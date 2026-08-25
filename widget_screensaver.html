@@ -112,10 +112,10 @@
             position: absolute;
             inset: 0;
             display: grid;
-            grid-template-columns: 40vw 60vw;
+            grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
             align-items: center;
             justify-items: center;
-            padding: 0 6vw;
+            padding: 0 5vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -158,7 +158,7 @@
             align-items: flex-start;
             gap: 2vh;
             padding-left: 2vw;
-            padding-right: 2vw;
+            padding-right: 6vw; /* MARGINE DESTRO DI SICUREZZA */
         }
 
         .row-live-now {
@@ -244,10 +244,10 @@
             position: absolute;
             inset: 0;
             display: grid;
-            grid-template-columns: 40vw 60vw;
+            grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
             align-items: center;
             justify-items: center;
-            padding: 0 6vw;
+            padding: 0 5vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -263,7 +263,7 @@
         .cover-wrapper {
             width: 44vh;
             height: 44vh;
-            max-width: 30vw;
+            max-width: 28vw;
             position: relative;
             border-radius: 24px;
             overflow: hidden;
@@ -287,8 +287,8 @@
             justify-content: center;
             align-items: flex-start;
             text-align: left;
-            padding-left: 2vw;
-            padding-right: 6vw; /* STESSO MARGINE SIMMETRICO DEL LATO SINISTRO */
+            padding-left: 1.5vw;
+            padding-right: 6vw; /* AMPIO MARGINE A DESTRA PER EVITARE IL TAGLIO DEL TESTO */
             overflow: hidden;
         }
 
