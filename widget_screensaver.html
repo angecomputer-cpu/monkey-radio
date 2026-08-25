@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* CONTAINER YOUTUBE FULLSCREEN (CON OVERFLOW PER NASCONDERE BORDI E LOGHI) */
+        /* CONTAINER YOUTUBE FULLSCREEN PIÙ TRASPARENTE */
         .youtube-bg-wrapper {
             position: absolute;
             top: 50%;
@@ -46,20 +46,20 @@
             width: 100%;
             height: 100%;
             border: none;
-            opacity: 0.75;
+            opacity: 0.45; /* Reso più trasparente come richiesto */
         }
 
-        /* OVERLAY GIALLO-SCURO PER MANTENERE IL BRAND E CONTRASTO ELEVATO */
+        /* OVERLAY SCURO MOLTO LEGGERO PER NON COPRIRE IL VIDEO */
         .brand-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0.85) 100%),
-                        linear-gradient(to top, rgba(248, 205, 24, 0.15) 0%, transparent 60%);
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.5) 100%),
+                        linear-gradient(to top, rgba(248, 205, 24, 0.05) 0%, transparent 60%);
             pointer-events: none;
             z-index: 2;
         }
 
-        /* BOX PRINCIPALE FULLSCREEN */
+        /* BOX PRINCIPALE FULLSCREEN CON TRASPARENZA MAGGIORE E BLUR RIDOTTO */
         .screensaver-info {
             position: absolute;
             top: 0;
@@ -67,8 +67,8 @@
             width: 100vw;
             height: 100vh;
             z-index: 10;
-            background: rgba(15, 15, 15, 0.55);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 15, 15, 0.25);
+            backdrop-filter: blur(4px);
             overflow: hidden;
         }
 
@@ -103,7 +103,7 @@
             overflow: hidden;
             clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
             animation: maskRevealRightToLeft 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
         }
 
         @keyframes maskRevealRightToLeft {
@@ -116,7 +116,7 @@
             object-fit: contain;
         }
 
-        /* STRUTTURA TESTO SCENA 1 (CHIANTO/GIALLO SU SCURO) */
+        /* STRUTTURA TESTO SCENA 1 */
         .live-text-block {
             width: 100%;
             display: flex;
@@ -135,7 +135,7 @@
             font-weight: 900;
             color: #ffffff;
             text-transform: uppercase;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
         }
 
         .box-slide-mask {
@@ -173,7 +173,7 @@
             padding: 4px 18px;
             border-radius: 10px;
             letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.7);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
             animation: liveBlink 1s infinite ease-in-out;
         }
 
@@ -237,7 +237,7 @@
             overflow: hidden;
             border: 4px solid #f8cd18;
             background: #111111;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
             clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
             animation: maskRevealRightToLeft 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
@@ -268,7 +268,7 @@
             border-radius: 10px;
             letter-spacing: 2px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
             animation: liveBlink 1.2s infinite ease-in-out;
         }
 
@@ -279,22 +279,21 @@
             text-align: left;
         }
 
-        /* RIVISTI I COLORI PER UNO SFONDO SCURO */
         .track-artist {
             font-size: 2vw;
             font-weight: 800;
-            color: #f8cd18; /* GIALLO MONKEY */
+            color: #f8cd18;
             text-transform: uppercase;
             letter-spacing: 1px;
             line-height: 1.25;
             margin-bottom: 8px;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
         }
 
         .track-title {
             font-size: 3.2vw;
             font-weight: 900;
-            color: #ffffff; /* BIANCO BRILLANTE */
+            color: #ffffff;
             line-height: 1.15;
             letter-spacing: -0.5px;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
@@ -323,9 +322,9 @@
 <body>
 
     <div class="monkey-stage">
-        <!-- YOUTUBE PLAYLIST BACKGROUND (AUTOSTART, NO AUDIO, LOOP) -->
+        <!-- YOUTUBE VIDEO BACKGROUND AGGIORNATO (AUTOSTART, NO AUDIO, LOOP, ID CLVB4yj1vks) -->
         <div class="youtube-bg-wrapper">
-            <iframe src="https://www.youtube.com/embed/videoseries?list=PLVdLN4Yhy71fG-v-BRCn3GgRAG_UJWJxc&autoplay=1&mute=1&controls=0&loop=1&enablejsapi=1&rel=0&showinfo=0" 
+            <iframe src="https://www.youtube.com/embed/clVB4yj1vks?autoplay=1&mute=1&controls=0&loop=1&playlist=clVB4yj1vks&enablejsapi=1&rel=0&showinfo=0" 
                     allow="autoplay; encrypted-media" 
                     allowfullscreen>
             </iframe>
