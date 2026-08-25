@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio - Screensaver Player</title>
+    <title>Monkey Radio - Fullscreen Screensaver Player</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,8 +12,8 @@
         }
 
         body, html {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
             background-color: #f8cd18;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -44,41 +44,37 @@
         .yellow-vignette {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 30%, rgba(248, 205, 24, 0.4) 100%),
-                        linear-gradient(to top, rgba(248, 205, 24, 0.85) 0%, transparent 45%);
+            background: radial-gradient(circle at center, transparent 20%, rgba(248, 205, 24, 0.4) 100%),
+                        linear-gradient(to top, rgba(248, 205, 24, 0.85) 0%, transparent 50%);
             pointer-events: none;
             z-index: 2;
         }
 
-        /* BOX PRINCIPALE REATTIVO */
+        /* BOX PRINCIPALE 100% LARGHEZZA E ALTEZZA */
         .screensaver-info {
             position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 580px;
-            height: 110px;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 10;
-            background: rgba(248, 205, 24, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 12px 18px;
-            border-radius: 20px;
-            border: 1px solid rgba(17, 17, 17, 0.2);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+            background: rgba(248, 205, 24, 0.55);
+            backdrop-filter: blur(8px);
             overflow: hidden;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
-        /* SCENA 1: LOGO SHOW + TESTO LIVE (EFFETTO MASCHERA E TYPEWRITER) */
+        /* SCENA 1: SHOW LOGO & NOW ON MONKEY RADIO (FULLSCREEN) */
         .scene-show {
             position: absolute;
             inset: 0;
-            padding: 12px 20px;
+            padding: 5vw;
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: center;
+            gap: 4vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -93,8 +89,8 @@
 
         /* MASCHERA PER REVEAL LOGO */
         .show-logo-mask {
-            height: 55px;
-            width: 120px;
+            height: 40vh;
+            width: 35vw;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -117,19 +113,19 @@
         .live-text-container {
             display: flex;
             align-items: center;
-            font-size: 1.1rem;
+            font-size: 3.5vw;
             font-weight: 900;
             color: #111111;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             text-transform: uppercase;
             white-space: nowrap;
         }
 
-        /* LETTERING REVEAL (EFFETTO COMPARSA LETTERA PER LETTERA) */
+        /* LETTERING REVEAL */
         .char-reveal {
             display: inline-block;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(15px);
             animation: letterAppear 0.3s forwards ease-out;
         }
 
@@ -140,14 +136,15 @@
             }
         }
 
-        /* SCENA 2: COVER + BRANO (ENTRATA DA DESTRA VS SINISTRA) */
+        /* SCENA 2: COVER & TRACK INFO (FULLSCREEN) */
         .scene-track {
             position: absolute;
             inset: 0;
-            padding: 12px 18px;
+            padding: 5vw;
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: center;
+            gap: 5vw;
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
@@ -161,15 +158,17 @@
         }
 
         .cover-wrapper {
-            width: 80px;
-            height: 80px;
+            width: 35vw;
+            height: 35vw;
+            max-width: 45vh;
+            max-height: 45vh;
             position: relative;
-            border-radius: 12px;
+            border-radius: 24px;
             overflow: hidden;
-            border: 2px solid #111111;
+            border: 4px solid #111111;
             flex-shrink: 0;
             background: #f8cd18;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
             animation: maskReveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
         }
@@ -187,19 +186,19 @@
             align-items: flex-start;
             text-align: left;
             flex-grow: 1;
-            min-width: 0;
+            max-width: 50vw;
             overflow: hidden;
         }
 
         .badge-live-mini {
-            font-size: 0.6rem;
+            font-size: 1.2vw;
             font-weight: 900;
             color: #ffffff;
             background-color: #ff0000;
-            padding: 2px 6px;
-            border-radius: 6px;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            padding: 6px 16px;
+            border-radius: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
             animation: cleanBlink 1.2s infinite ease-in-out;
         }
 
@@ -216,25 +215,30 @@
         }
 
         .track-artist {
-            font-size: 0.85rem;
+            font-size: 2vw;
             font-weight: 700;
             color: #333333;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .track-title {
-            font-size: 1.15rem;
+            font-size: 3.5vw;
             font-weight: 900;
             color: #111111;
+            line-height: 1.1;
         }
 
-        @media (max-width: 600px) {
-            .screensaver-info { height: 95px; bottom: 20px; padding: 10px; }
-            .show-logo-mask { height: 45px; width: 90px; }
-            .live-text-container { font-size: 0.85rem; }
-            .cover-wrapper { width: 65px; height: 65px; }
-            .track-title { font-size: 0.95rem; }
-            .track-artist { font-size: 0.75rem; }
+        @media (max-width: 768px) {
+            .scene-show, .scene-track { flex-direction: column; justify-content: center; gap: 3vh; }
+            .show-logo-mask { width: 70vw; height: 25vh; }
+            .live-text-container { font-size: 5vw; }
+            .cover-wrapper { width: 50vw; height: 50vw; }
+            .track-metadata { max-width: 85vw; align-items: center; text-align: center; }
+            .artist-line, .title-line { text-align: center; }
+            .track-artist { font-size: 4vw; }
+            .track-title { font-size: 6vw; }
+            .badge-live-mini { font-size: 3vw; }
         }
     </style>
 </head>
@@ -246,7 +250,7 @@
         
         <div class="yellow-vignette"></div>
 
-        <!-- RECTANGULAR REACTIVE BOX -->
+        <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
             <!-- SCENA 1: SHOW LOGO & NOW ON MONKEY RADIO -->
             <div id="sceneShow" class="scene-show">
@@ -256,7 +260,7 @@
                 <div id="liveText" class="live-text-container"></div>
             </div>
 
-            <!-- SCENA 2: COVER & TRACK INFO (GIUSTIFICATO A SINISTRA) -->
+            <!-- SCENA 2: COVER & TRACK INFO -->
             <div id="sceneTrack" class="scene-track">
                 <div class="cover-wrapper">
                     <img id="trackCover" class="cover-img" src="https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png" alt="Cover">
@@ -325,7 +329,6 @@
             }
         }
 
-        // SCARED TYPEWRITER / LETTER REVEAL ANIMATION
         function typeWriterText(targetElement, text, startDelay = 0) {
             targetElement.innerHTML = '';
             const chars = text.split('');
@@ -397,7 +400,6 @@
                 } catch (e) {}
             }
 
-            // ALTERNANZA SCENE SCROLLING TYPEWRITER
             triggerShowScene();
             setTimeout(() => {
                 triggerTrackScene(artist, title, coverUrl);
@@ -407,7 +409,6 @@
         updateShowSchedule();
         setInterval(updateShowSchedule, 60000);
 
-        // CICLO CONTINUO SCREENSAVER TRA SHOW E TRACCIA
         setInterval(() => {
             if (currentRawInfo) {
                 if (isTrackSceneActive) {
