@@ -431,9 +431,12 @@
     (function() {
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
 
-        // LOGO PER STREAMING DIRETTA E LOGO ARCHIVE DEDICATO
+        // LOGO E NOME SHOW PER STREAMING DIRETTA E ARCHIVE
         const LOGO_STREAM = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
+        const NAME_STREAM = "Monkey House Everyday";
+
         const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
+        const NAME_ARCHIVE = "Monkey Archive";
 
         const sceneShow = document.getElementById('sceneShow');
         const sceneTrack = document.getElementById('sceneTrack');
@@ -487,10 +490,10 @@
             const hour = getRomeHour();
             // Fascia oraria Monkey Archive: dalle 00:00 alle 06:00 e dalle 12:00 alle 14:00
             if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                return { logo: LOGO_ARCHIVE, name: "Monkey Archive" };
+                return { logo: LOGO_ARCHIVE, name: NAME_ARCHIVE };
             }
             // Altrimenti logo e nome di streaming standard
-            return { logo: LOGO_STREAM, name: "Monkey House Everyday" };
+            return { logo: LOGO_STREAM, name: NAME_STREAM };
         }
 
         function updateShowLogo() {
