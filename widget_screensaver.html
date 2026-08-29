@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* --- VIDEO DI SFONDO (PULITO, SENZA NESSUNA SFOCATURA O PATINA) --- */
+        /* --- VIDEO DI SFONDO --- */
         .bg-video {
             position: absolute;
             top: 0;
@@ -38,6 +38,18 @@
             object-fit: cover;
             z-index: 1;
             filter: none;
+        }
+
+        /* PATINA SCURA LEGGERA (35% di opacità) PER LEGGIBILITÀ */
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.35);
+            z-index: 2;
+            pointer-events: none;
         }
 
         /* BOX PRINCIPALE FULLSCREEN */
@@ -202,7 +214,7 @@
         .row-current-show {
             font-size: 1.8vw;
             font-weight: 700;
-            color: #a0a0a0;
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             white-space: nowrap;
@@ -365,8 +377,9 @@
 <body>
 
     <div class="monkey-stage">
-        <!-- VIDEO DI SFONDO -->
+        <!-- VIDEO DI SFONDO E PATINA SCURA -->
         <video id="bgVideo" class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" autoplay muted loop playsinline></video>
+        <div class="bg-overlay"></div>
 
         <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
