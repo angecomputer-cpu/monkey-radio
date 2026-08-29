@@ -28,27 +28,23 @@
             overflow: hidden;
         }
 
-        /* CONTAINER YOUTUBE FULLSCREEN TRASPARENTE CON OVER-SCALE PER NASCONDERE IL TITOLO */
-        .youtube-bg-wrapper {
+        /* VIDEO BACKGROUND FULLSCREEN SENZA PUBBLICITÀ */
+        .video-bg-wrapper {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120vw;
-            height: 67.5vw;
-            min-height: 120vh;
-            min-width: 213.33vh;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 1;
             overflow: hidden;
         }
 
-        .youtube-bg-wrapper iframe {
+        .video-bg-wrapper video {
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover;
             opacity: 0.45;
-            transform: scale(1.15); /* Ingrandisce l'iframe spingendo il titolo fuori dallo schermo */
         }
 
         /* OVERLAY SCURO LEGGERO */
@@ -159,7 +155,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            gap: 1.5vh; /* Leggermente ridotto per accogliere il titolo show */
+            gap: 1.5vh;
             padding-left: 2vw;
             padding-right: 6vw;
         }
@@ -237,7 +233,7 @@
             letter-spacing: 1.5px;
             white-space: nowrap;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-            margin-top: -0.5vh; /* Avvicina leggermente al titolo della radio */
+            margin-top: -0.5vh;
         }
 
         .char-reveal {
@@ -391,12 +387,11 @@
 <body>
 
     <div class="monkey-stage">
-        <!-- YOUTUBE VIDEO BACKGROUND -->
-        <div class="youtube-bg-wrapper">
-            <iframe src="https://www.youtube.com/embed/6KrEqSrN-TE?autoplay=1&mute=1&controls=0&loop=1&playlist=6KrEqSrN-TE&enablejsapi=1&rel=0&showinfo=0" 
-                    allow="autoplay; encrypted-media" 
-                    allowfullscreen>
-            </iframe>
+        <!-- VIDEO BACKGROUND DA ARCHIVE.ORG (SENZA PUBBLICITÀ) -->
+        <div class="video-bg-wrapper">
+            <video autoplay muted loop playsinline id="bgVideo">
+                <source src="INSERISCI_QUI_IL_LINK_DIRECT_DI_ARCHIVE_ORG.mp4" type="video/mp4">
+            </video>
         </div>
         
         <div class="brand-overlay"></div>
@@ -571,12 +566,11 @@
                 showTitle = "Monkey House Certified";
             }
             
-            // Faccio partire l'animazione leggermente dopo rispetto a "MONKEY RADIO"
             typeWriterText(showTitleContainer, showTitle, 1.6);
         }
 
         function triggerTrackScene(artist, title, coverUrl) {
-            trackCover.src = coverUrl || LOGO_ARCHIVE;
+            trackCover.src = coverUrl || DEFAULT_COVER;
             sceneShow.classList.add('slide-out');
             sceneTrack.classList.add('slide-in');
 
@@ -636,14 +630,16 @@
                         coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
                     }
                 } catch (e) {}
-            } else {
-                coverUrl = LOGO_ARCHIVE;
+            }
+            
+            if (!coverUrl) {
+                coverUrl = DEFAULT_COVER;
             }
 
             triggerShowScene();
             setTimeout(() => {
                 triggerTrackScene(artist, title, coverUrl);
-            }, 5500); // Leggermente esteso per dare il tempo di leggere il titolo dello show
+            }, 5500);
         }
 
         updateShowLogo();
