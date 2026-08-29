@@ -359,4 +359,203 @@
             .row-station-name { font-size: 5vw; }
             .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
             .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .artist-line-wrapper, .title-line-wrapper, .
+            .artist-line-wrapper, .title-line-wrapper, .show-line-wrapper { text-align: center; }
+            .track-artist { font-size: 3.5vw; }
+            .track-title { font-size: 5vw; }
+            .track-show { font-size: 2.5vw; }
+            .badge-live-mini { font-size: 2.8vw; padding: 4px 12px; }
+            .fullscreen-btn { width: 50px; height: 50px; bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="monkey-stage">
+        <video class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" preload="auto" loop muted playsinline autoplay></video>
+
+        <div class="screensaver-info">
+            <div id="sceneShow" class="scene-show">
+                <div class="show-logo-mask">
+                    <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
+                </div>
+                <div class="live-text-block">
+                    <div class="row-live-now">
+                        <div class="box-slide-mask">
+                            <span class="slide-from-left">NOW</span>
+                        </div>
+                        <span class="badge-live-flash">LIVE</span>
+                        <div class="box-slide-mask">
+                            <span class="slide-from-right">ON</span>
+                        </div>
+                    </div>
+                    <div class="row-station-name" id="stationNameContainer"></div>
+                </div>
+            </div>
+
+            <div id="sceneTrack" class="scene-track">
+                <div class="cover-wrapper">
+                    <img id="trackCover" class="cover-img" src="" alt="Cover">
+                </div>
+                <div class="track-metadata">
+                    <span class="badge-live-mini">NOW ON AIR</span>
+                    <div class="artist-line-wrapper" id="artistWrapper">
+                        <div class="track-artist" id="artistContainer"></div>
+                    </div>
+                    <div class="title-line-wrapper" id="titleWrapper">
+                        <div class="track-title" id="titleContainer"></div>
+                    </div>
+                    <div class="show-line-wrapper" id="showWrapper">
+                        <div class="track-show" id="showContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
+            <svg id="fsIcon" viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+    (function() {
+        const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
+
+        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
+        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png";
+        const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
+
+        const sceneShow = document.getElementById('sceneShow');
+        const sceneTrack = document.getElementById('sceneTrack');
+        const showLogo = document.getElementById('showLogo');
+        const stationNameContainer = document.getElementById('stationNameContainer');
+        const trackCover = document.getElementById('trackCover');
+        
+        const artistWrapper = document.getElementById('artistWrapper');
+        const artistContainer = document.getElementById('artistContainer');
+        const titleWrapper = document.getElementById('titleWrapper');
+        const titleContainer = document.getElementById('titleContainer');
+        const showWrapper = document.getElementById('showWrapper');
+        const showContainer = document.getElementById('showContainer');
+
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fsIcon = document.getElementById('fsIcon');
+
+        let currentRawInfo = "";
+        let currentArtist = "";
+        let currentTitle = "";
+        let currentShowName = "";
+
+        // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
+        const icons = {
+            enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
+            exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
+        };
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error("Errore nell'attivare il fullscreen:", err);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fsIcon.innerHTML = `<path d="${icons.exit}"/>`;
+                fullscreenBtn.setAttribute('title', 'Esci da Schermo Intero');
+            } else {
+                fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
+                fullscreenBtn.setAttribute('title', 'Attiva Schermo Intero');
+            }
+        });
+
+        function getRomeHour() {
+            return parseInt(new Intl.DateTimeFormat('it-IT', {
+                hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
+            }).format(new Date()));
+        }
+
+        function getCurrentShowDetails() {
+            const hour = getRomeHour();
+            let targetLogo = LOGO_EVERYDAY;
+            let showName = "Monkey House Everyday";
+
+            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
+                targetLogo = LOGO_ARCHIVE;
+                showName = "Monkey Archive";
+            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
+                targetLogo = LOGO_CERTIFIED;
+                showName = "Monkey House Certified";
+            }
+
+            return { logo: targetLogo, name: showName };
+        }
+
+        function updateShowLogo() {
+            const details = getCurrentShowDetails();
+            if (showLogo.src !== details.logo) {
+                showLogo.src = details.logo;
+            }
+        }
+
+        function typeWriterText(targetElement, text, startDelay = 0) {
+            targetElement.innerHTML = '';
+            const chars = text.split('');
+            chars.forEach((char, index) => {
+                const span = document.createElement('span');
+                span.className = 'char-reveal';
+                span.innerHTML = char === ' ' ? '&nbsp;' : char;
+                span.style.animationDelay = `${startDelay + (index * 0.04)}s`;
+                targetElement.appendChild(span);
+            });
+        }
+
+        function checkAndApplyMarquee(wrapper, innerElement) {
+            innerElement.classList.remove('is-overflowing');
+            const clones = wrapper.querySelectorAll('.marquee-clone');
+            clones.forEach(c => c.remove());
+
+            setTimeout(() => {
+                if (innerElement.scrollWidth > wrapper.clientWidth) {
+                    innerElement.classList.add('is-overflowing');
+                    const clone = innerElement.cloneNode(true);
+                    clone.classList.remove('is-overflowing');
+                    clone.classList.add('marquee-clone');
+                    clone.style.marginLeft = '40px';
+                    wrapper.appendChild(clone);
+                }
+            }, 500);
+        }
+
+        function triggerShowScene() {
+            sceneTrack.classList.remove('slide-in');
+            sceneShow.classList.remove('slide-out');
+            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
+        }
+
+        function triggerTrackScene(artist, title, showName, coverUrl) {
+            trackCover.src = coverUrl;
+            sceneShow.classList.add('slide-out');
+            sceneTrack.classList.add('slide-in');
+
+            artistContainer.innerText = artist;
+            titleContainer.innerText = title;
+            showContainer.innerText = showName;
+
+            checkAndApplyMarquee(artistWrapper, artistContainer);
+            checkAndApplyMarquee(titleWrapper, titleContainer);
+            checkAndApplyMarquee(showWrapper, showContainer);
+        }
+
+        async function fetchSongData() {
+            try {
+                const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
+                if (!res.ok) return;
+                const data = await res.json();
+                let rawInfo = "Monkey Radio - Diretta
