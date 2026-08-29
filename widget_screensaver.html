@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* --- VIDEO DI SFONDO DI ARCHIVE.ORG A TUTTO SCHERMO --- */
+        /* --- VIDEO DI SFONDO DI ARCHIVE.ORG A TUTTO SCHERMO (SFOCATURA E OVERLAY SCURO RIMOSSI) --- */
         .bg-video {
             position: absolute;
             top: 0;
@@ -36,21 +36,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.45;
             z-index: 1;
         }
 
-        /* OVERLAY SCURO LEGGERO */
-        .brand-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.5) 100%),
-                        linear-gradient(to top, rgba(248, 205, 24, 0.05) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* BOX PRINCIPALE FULLSCREEN (SFONDO E SFOCATURA RIMOSSI) */
+        /* BOX PRINCIPALE FULLSCREEN */
         .screensaver-info {
             position: absolute;
             top: 0;
@@ -63,7 +52,7 @@
             overflow: hidden;
         }
 
-        /* PULSANTE FULLSCREEN AL CENTRO (SENZA SFOCATURA) */
+        /* PULSANTE FULLSCREEN AL CENTRO */
         .fullscreen-btn {
             position: absolute;
             top: 50%;
@@ -367,10 +356,8 @@
 <body>
 
     <div class="monkey-stage">
-        <!-- VIDEO DI SFONDO DI ARCHIVE.ORG -->
+        <!-- VIDEO DI SFONDO DI ARCHIVE.ORG A TUTTO SCHERMO -->
         <video class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" preload="auto" loop muted playsinline autoplay></video>
-        
-        <div class="brand-overlay"></div>
 
         <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
