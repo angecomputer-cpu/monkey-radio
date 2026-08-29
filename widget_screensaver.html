@@ -465,6 +465,7 @@
 
         let currentRawInfo = null;
         let lastActiveShowName = null;
+        let resizeTimer = null;
 
         const icons = {
             enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
@@ -491,6 +492,16 @@
                 fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
                 fullscreenBtn.setAttribute('title', 'Toggle Fullscreen');
             }
+            // Ricalcola i marquee al cambio di stato fullscreen
+            setTimeout(checkAllMarquees, 300);
+        });
+
+        // Ricalcola i marquee se la finestra viene ridimensionata o cambia risoluzione
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                checkAllMarquees();
+            }, 250);
         });
 
         function getRomeHour() {
@@ -544,21 +555,26 @@
             });
         }
 
-        function checkAndApplyMarquee(wrapper, innerElement) {
+        function applyMarquee(wrapper, innerElement) {
             innerElement.classList.remove('is-overflowing');
             const clones = wrapper.querySelectorAll('.marquee-clone');
             clones.forEach(c => c.remove());
 
-            setTimeout(() => {
-                if (innerElement.scrollWidth > wrapper.clientWidth) {
-                    innerElement.classList.add('is-overflowing');
-                    const clone = innerElement.cloneNode(true);
-                    clone.classList.remove('is-overflowing');
-                    clone.classList.add('marquee-clone');
-                    clone.style.marginLeft = '40px';
-                    wrapper.appendChild(clone);
-                }
-            }, 500);
+            // Forza il ricalcolo delle dimensioni corrette
+            if (innerElement.scrollWidth > wrapper.clientWidth) {
+                innerElement.classList.add('is-overflowing');
+                const clone = innerElement.cloneNode(true);
+                clone.classList.remove('is-overflowing');
+                clone.classList.add('marquee-clone');
+                clone.style.marginLeft = '40px';
+                wrapper.appendChild(clone);
+            }
+        }
+
+        function checkAllMarquees() {
+            applyMarquee(artistWrapper, artistContainer);
+            applyMarquee(titleWrapper, titleContainer);
+            applyMarquee(showWrapper, showContainer);
         }
 
         function triggerShowScene() {
@@ -578,9 +594,9 @@
             titleContainer.innerText = title;
             showContainer.innerText = showName;
 
-            checkAndApplyMarquee(artistWrapper, artistContainer);
-            checkAndApplyMarquee(titleWrapper, titleContainer);
-            checkAndApplyMarquee(showWrapper, showContainer);
+            setTimeout(() => {
+                checkAllMarquees();
+            }, 400);
         }
 
         async function fetchSongData() {
