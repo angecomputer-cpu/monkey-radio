@@ -159,7 +159,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            gap: 2vh;
+            gap: 1.5vh; /* Leggermente ridotto per accogliere il titolo show */
             padding-left: 2vw;
             padding-right: 6vw;
         }
@@ -173,6 +173,7 @@
             color: #ffffff;
             text-transform: uppercase;
             text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+            margin-bottom: 0.5vh;
         }
 
         .box-slide-mask {
@@ -226,6 +227,17 @@
             letter-spacing: 2px;
             white-space: nowrap;
             text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+        }
+
+        .row-show-title {
+            font-size: 2.2vw;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+            margin-top: -0.5vh; /* Avvicina leggermente al titolo della radio */
         }
 
         .char-reveal {
@@ -365,6 +377,7 @@
             .row-live-now { font-size: 4vw; gap: 2vw; }
             .badge-live-flash { font-size: 3vw; padding: 2px 10px; }
             .row-station-name { font-size: 5vw; }
+            .row-show-title { font-size: 3.5vw; margin-top: 0; }
             .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
             .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
             .artist-line-wrapper, .title-line-wrapper { text-align: center; }
@@ -406,6 +419,7 @@
                         </div>
                     </div>
                     <div class="row-station-name" id="stationNameContainer"></div>
+                    <div class="row-show-title" id="showTitleContainer"></div>
                 </div>
             </div>
 
@@ -447,6 +461,7 @@
         const sceneTrack = document.getElementById('sceneTrack');
         const showLogo = document.getElementById('showLogo');
         const stationNameContainer = document.getElementById('stationNameContainer');
+        const showTitleContainer = document.getElementById('showTitleContainer');
         const trackCover = document.getElementById('trackCover');
         
         const artistWrapper = document.getElementById('artistWrapper');
@@ -542,7 +557,22 @@
         function triggerShowScene() {
             sceneTrack.classList.remove('slide-in');
             sceneShow.classList.remove('slide-out');
+            
+            // 1. Scrive il nome della stazione
             typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
+
+            // 2. Determina e scrive il titolo dello show in base all'orario
+            const hour = getRomeHour();
+            let showTitle = "Monkey House Everyday";
+            
+            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
+                showTitle = "Monkey Archive";
+            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
+                showTitle = "Monkey House Certified";
+            }
+            
+            // Faccio partire l'animazione leggermente dopo rispetto a "MONKEY RADIO"
+            typeWriterText(showTitleContainer, showTitle, 1.6);
         }
 
         function triggerTrackScene(artist, title, coverUrl) {
@@ -613,7 +643,7 @@
             triggerShowScene();
             setTimeout(() => {
                 triggerTrackScene(artist, title, coverUrl);
-            }, 4000);
+            }, 5500); // Leggermente esteso per dare il tempo di leggere il titolo dello show
         }
 
         updateShowLogo();
