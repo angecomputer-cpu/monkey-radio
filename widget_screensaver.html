@@ -207,6 +207,18 @@
             letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
             animation: liveBlink 1s infinite ease-in-out;
+            transition: background-color 0.3s ease;
+        }
+
+        .badge-live-flash.paused, .badge-live-mini.paused {
+            background-color: #555555 !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+
+        .badge-live-flash.loading, .badge-live-mini.loading {
+            background-color: #ffa500 !important;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.8) !important;
         }
 
         @keyframes liveBlink {
@@ -313,6 +325,7 @@
             margin-bottom: 16px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
             animation: liveBlink 1.2s infinite ease-in-out;
+            transition: background-color 0.3s ease;
         }
 
         .artist-line-wrapper, .title-line-wrapper {
@@ -407,7 +420,7 @@
                         <div class="box-slide-mask">
                             <span class="slide-from-left">NOW</span>
                         </div>
-                        <span class="badge-live-flash">LIVE</span>
+                        <span class="badge-live-flash" id="badgeFlash">LIVE</span>
                         <div class="box-slide-mask">
                             <span class="slide-from-right">ON</span>
                         </div>
@@ -423,7 +436,7 @@
                     <img id="trackCover" class="cover-img" src="" alt="Cover">
                 </div>
                 <div class="track-metadata">
-                    <span class="badge-live-mini">NOW ON AIR</span>
+                    <span class="badge-live-mini" id="badgeMini">NOW ON AIR</span>
                     <div class="artist-line-wrapper" id="artistWrapper">
                         <div class="track-artist" id="artistContainer"></div>
                     </div>
@@ -444,6 +457,35 @@
 
     <script>
     (function() {
+        // === CANALE SINCRONIZZAZIONE CROSS-WINDOW ===
+        const radioChannel = new BroadcastChannel('monkey_radio_stream');
+        const badgeFlash = document.getElementById('badgeFlash');
+        const badgeMini = document.getElementById('badgeMini');
+
+        radioChannel.onmessage = (event) => {
+            const data = event.data;
+            if (data.state === 'playing') {
+                badgeFlash.innerText = "LIVE";
+                badgeMini.innerText = "NOW ON AIR";
+                badgeFlash.classList.remove('paused', 'loading');
+                badgeMini.classList.remove('paused', 'loading');
+            } else if (data.state === 'loading') {
+                badgeFlash.innerText = "WAIT";
+                badgeMini.innerText = "LOADING";
+                badgeFlash.classList.add('loading');
+                badgeMini.classList.add('loading');
+                badgeFlash.classList.remove('paused');
+                badgeMini.classList.remove('paused');
+            } else if (data.state === 'stopped') {
+                badgeFlash.innerText = "OFF";
+                badgeMini.innerText = "STANDBY";
+                badgeFlash.classList.add('paused');
+                badgeMini.classList.add('paused');
+                badgeFlash.classList.remove('loading');
+                badgeMini.classList.remove('loading');
+            }
+        };
+
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
         const DEFAULT_COVER = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
 
