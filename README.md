@@ -1,49 +1,7 @@
-# 🐒 Monkey Radio - Video Player Stable (v1.0)
-
-> **Status:** `v1.0 Stable`  
-> **Sincronizzazione:** Roma, Italia (Europe/Rome)
-
-Questa è la versione definitiva del video player per il palinsesto dinamico di **Monkey Radio**. Progettata per essere integrata via Iframe, garantisce la sincronizzazione globale dei contenuti.
-
----
-
-## 🚀 Caratteristiche Principali
-
-* **Palinsesto Dinamico:** Cambio automatico della sorgente video basato sull'orario.
-* **Fuso Orario Centralizzato (Roma):** Grazie all'integrazione delle API `Intl`, tutti gli utenti nel mondo vedono lo stesso contenuto sincronizzato sull'ora italiana.
-* **Interfaccia Minimalista:** Design "Full Black" ottimizzato per eliminare distrazioni e massimizzare il focus sul video.
-
----
-
-## 🛠 Migliorie Tecniche
-
-### 📱 Fullscreen & Rotazione
-* **Smart Fullscreen:** Tasto dedicato (30x30px) posizionato in basso al centro per una gestione immediata dei permessi browser.
-* **Auto-Landscape Force:** All'attivazione dello schermo intero su dispositivi Android, il player forza l'orientamento in **orizzontale**.
-* **Anti-Glitch Resize:** Gestione dinamica degli eventi `orientationchange`. Se l'utente ruota fisicamente il telefono, il video si ricalcola istantaneamente per non sparire.
-
-### 🔐 Sicurezza & Iframe
-* **Iframe Security Bypass:** Logica ottimizzata per funzionare correttamente all'interno di container (come Nicepage), con gestione degli errori in caso di permessi `allowfullscreen` mancanti.
-
----
-
-## 📅 Palinsesto Attivo (Orario IT)
-
-| Fascia Oraria | Contenuto Video |
-| :--- | :--- |
-| **00:00 - 06:00** | Archive Video |
-| **06:00 - 09:00** | Certified Video |
-| **09:00 - 12:00** | Everyday Video |
-| **12:00 - 14:00** | Archive Video |
-| **14:00 - 18:00** | Everyday Video |
-| **18:00 - 21:00** | Certified Video |
-| **21:00 - 00:00** | Everyday Video |
-
----
-
-### 📥 Integrazione Rapida
-Se integri il player in un Iframe, assicurati di includere i permessi necessari:
-`allow="fullscreen"` e `allowfullscreen="true"`.
-
----
-*Sviluppato per Monkey Radio. Sorgenti video ospitate su Archive.org.*
+🐒 Monkey Radio - Screensaver Player Stable (v1.1)Status: v1.1 StableSincronizzazione: Roma, Italia (Europe/Rome)Versione aggiornata del player/screensaver per il palinsesto dinamico di Monkey Radio. Progettata per l'integrazione via iframe o visualizzazione standalone fullscreen, garantisce la sincronizzazione globale dei contenuti e delle grafiche di scena.🚀 Caratteristiche PrincipaliPalinsesto & Grafiche Dinamiche: Cambio automatico di loghi, sfondi e titoli dello show in base all'orario italiano.Scena Doppia Interattiva (Show / Track):Scena 1 (Show): Animazione typewriter per il nome della radio (MONKEY RADIO) e per il titolo dello show attivo.Scena 2 (Track Metadata): Transizione fluida alla traccia in onda con recupero dinamico di artista, titolo e cover art ad alta risoluzione (via iTunes API).Marquee Automatico Sincronizzato: Lo scorrimento del testo (marquee) per artista e titolo si attiva esclusivamente se la lunghezza della stringa supera la larghezza del contenitore visibile.Fuso Orario Centralizzato (Roma): Gestione precisa del tempo tramite API Intl per sincronizzare tutti gli utenti globalmente.🛠 Migliorie Tecniche & Interfaccia📺 Visual & LayoutBackground Scaling & Clean View: Iframe YouTube in background con over-scale per eliminare watermark e titoli nativi.Typing Animation: Effetto comparsa carattere per carattere su stazione e titolo dello show.📱 Fullscreen & UI ControlSmart Fullscreen Button: Tasto dedicato (posizionato in basso al centro) con icone dinamiche di stato (Enter/Exit Fullscreen) e supporto ai permessi dei browser moderni.Responsive Layout: Adattamento automatico della griglia e delle dimensioni dei font per dispositivi mobile e tablet.🔐 Sicurezza & IframeIframe Security Bypass: Logica ottimizzata per il funzionamento in container terzi (es. Nicepage) con fallback in caso di restrizioni sui permessi fullscreen.📅 Palinsesto & Show Attivi (Orario IT)Fascia OrariaFormat / Titolo ShowLogo & Asset00:00 - 06:00Monkey ArchiveLogo Archive06:00 - 09:00Monkey House CertifiedLogo Certified09:00 - 12:00Monkey House EverydayLogo Everyday12:00 - 14:00Monkey ArchiveLogo Archive14:00 - 18:00Monkey House EverydayLogo Everyday18:00 - 21:00Monkey House CertifiedLogo Certified21:00 - 00:00Monkey House EverydayLogo Everyday📥 Integrazione RapidaSe integri il player all'interno di un <iframe>, assicurati di includere i permessi corretti per il supporto fullscreen:HTML<iframe src="PATH_DEL_TUO_PLAYER.html" 
+        width="100%" 
+        height="100%" 
+        style="border:none;" 
+        allow="autoplay; fullscreen" 
+        allowfullscreen="true">
+</iframe>
