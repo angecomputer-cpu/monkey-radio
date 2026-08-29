@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* --- VIDEO DI SFONDO DI ARCHIVE.ORG A TUTTO SCHERMO --- */
+        /* --- VIDEO DI SFONDO (PULITO, SENZA NESSUNA SFOCATURA O PATINA) --- */
         .bg-video {
             position: absolute;
             top: 0;
@@ -37,6 +37,7 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
+            filter: none;
         }
 
         /* BOX PRINCIPALE FULLSCREEN */
@@ -48,7 +49,6 @@
             height: 100vh;
             z-index: 10;
             background: transparent;
-            backdrop-filter: none;
             overflow: hidden;
         }
 
@@ -69,7 +69,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            backdrop-filter: none;
             box-shadow: 0 8px 25px rgba(0,0,0,0.8);
             transition: all 0.3s cubic-bezier(0.77, 0, 0.175, 1);
         }
@@ -85,7 +84,6 @@
             width: 26px;
             height: 26px;
             fill: currentColor;
-            transition: transform 0.3s ease;
         }
 
         /* SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO */
@@ -171,13 +169,8 @@
             animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
         }
 
-        @keyframes slideInLeft {
-            to { transform: translateX(0); }
-        }
-
-        @keyframes slideInRight {
-            to { transform: translateX(0); }
-        }
+        @keyframes slideInLeft { to { transform: translateX(0); } }
+        @keyframes slideInRight { to { transform: translateX(0); } }
 
         .badge-live-flash {
             font-size: 1.8vw;
@@ -214,10 +207,7 @@
         }
 
         @keyframes letterAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* SCENA 2: COVER & TRACK INFO */
@@ -295,14 +285,6 @@
             margin-bottom: 8px;
         }
 
-        .title-line-wrapper {
-            margin-bottom: 8px;
-        }
-
-        .show-line-wrapper {
-            margin-bottom: 0;
-        }
-
         .track-artist, .track-title, .track-show {
             display: inline-block;
             white-space: nowrap;
@@ -371,27 +353,27 @@
 <body>
 
     <div class="monkey-stage">
-        <video class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" preload="auto" loop muted playsinline autoplay></video>
+        <!-- VIDEO DI SFONDO -->
+        <video id="bgVideo" class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" autoplay muted loop playsinline></video>
 
+        <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
+            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
             <div id="sceneShow" class="scene-show">
                 <div class="show-logo-mask">
                     <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
                 </div>
                 <div class="live-text-block">
                     <div class="row-live-now">
-                        <div class="box-slide-mask">
-                            <span class="slide-from-left">NOW</span>
-                        </div>
+                        <div class="box-slide-mask"><span class="slide-from-left">NOW</span></div>
                         <span class="badge-live-flash">LIVE</span>
-                        <div class="box-slide-mask">
-                            <span class="slide-from-right">ON</span>
-                        </div>
+                        <div class="box-slide-mask"><span class="slide-from-right">ON</span></div>
                     </div>
                     <div class="row-station-name" id="stationNameContainer"></div>
                 </div>
             </div>
 
+            <!-- SCENA 2: COVER & TRACK INFO -->
             <div id="sceneTrack" class="scene-track">
                 <div class="cover-wrapper">
                     <img id="trackCover" class="cover-img" src="" alt="Cover">
@@ -411,6 +393,7 @@
             </div>
         </div>
 
+        <!-- PULSANTE FULLSCREEN -->
         <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
             <svg id="fsIcon" viewBox="0 0 24 24">
                 <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
@@ -422,8 +405,8 @@
     (function() {
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
 
-        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
-        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png";
+        // LOGO PER STREAMING DIRETTA E VARIANTE ARCHIVE
+        const LOGO_STREAM = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
         const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
 
         const sceneShow = document.getElementById('sceneShow');
@@ -443,11 +426,7 @@
         const fsIcon = document.getElementById('fsIcon');
 
         let currentRawInfo = "";
-        let currentArtist = "";
-        let currentTitle = "";
-        let currentShowName = "";
 
-        // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
         const icons = {
             enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
             exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
@@ -455,13 +434,9 @@
 
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error("Errore nell'attivare il fullscreen:", err);
-                });
+                document.documentElement.requestFullscreen().catch(err => console.error(err));
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         });
 
@@ -483,18 +458,11 @@
 
         function getCurrentShowDetails() {
             const hour = getRomeHour();
-            let targetLogo = LOGO_EVERYDAY;
-            let showName = "Monkey House Everyday";
-
+            // Orario di archive: 00:00 - 06:00 e 12:00 - 14:00
             if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                targetLogo = LOGO_ARCHIVE;
-                showName = "Monkey Archive";
-            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
-                targetLogo = LOGO_CERTIFIED;
-                showName = "Monkey House Certified";
+                return { logo: LOGO_ARCHIVE, name: "Monkey Archive" };
             }
-
-            return { logo: targetLogo, name: showName };
+            return { logo: LOGO_STREAM, name: "Monkey House Everyday" };
         }
 
         function updateShowLogo() {
@@ -554,8 +522,65 @@
         }
 
         async function fetchSongData() {
+            let rawInfo = "Monkey Radio - Diretta Streaming";
             try {
                 const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
-                if (!res.ok) return;
-                const data = await res.json();
-                let rawInfo = "Monkey Radio - Diretta
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.icestats && data.icestats.source) {
+                        const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+                        const mount = sources.find(m => m.listenurl && m.listenurl.includes("/radio.mp3"));
+                        if (mount && mount.title) rawInfo = mount.title;
+                    }
+                }
+            } catch (err) {}
+
+            if (rawInfo !== currentRawInfo) {
+                currentRawInfo = rawInfo;
+                processNewSong(rawInfo);
+            }
+        }
+
+        async function processNewSong(rawInfo) {
+            updateShowLogo();
+            const showDetails = getCurrentShowDetails();
+            
+            const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Diretta Streaming" || !rawInfo.includes(" - "));
+
+            if (isGenericStream) {
+                triggerShowScene();
+            } else {
+                const parts = rawInfo.split(" - ");
+                const artist = parts[0].trim();
+                const title = parts.slice(1).join(" - ").trim();
+                let coverUrl = null;
+
+                try {
+                    const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawInfo)}&entity=song&limit=1`);
+                    const itunesData = await itunesRes.json();
+                    if (itunesData.results && itunesData.results.length > 0) {
+                        coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
+                    }
+                } catch (e) {}
+
+                if (!coverUrl) {
+                    coverUrl = showDetails.logo;
+                }
+
+                triggerShowScene();
+                setTimeout(() => {
+                    triggerTrackScene(artist, title, showDetails.name, coverUrl);
+                }, 4000);
+            }
+        }
+
+        updateShowLogo();
+        triggerShowScene();
+
+        fetchSongData();
+        setInterval(fetchSongData, 15000);
+        setInterval(updateShowLogo, 60000);
+    })();
+    </script>
+</body>
+</html>
