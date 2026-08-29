@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio Italy Player</title>
+    <title>Monkey Radio Italy</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,7 @@
             padding: 0;
             background: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: #000000;
+            color: #ffffff;
             overflow: hidden;
             user-select: none;
             position: relative;
@@ -35,30 +35,32 @@
             z-index: 0;
         }
 
-        /* --- BARRA PLAYER SOVRAPPOSTA --- */
+        /* --- PLAYER BAR PRINCIPALE --- */
         .player-bar {
             position: relative;
             z-index: 1;
             width: 100%;
             height: 100%;
-            padding: 10px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.9); /* Sfondo leggermente traslucido per leggibilità */
+            gap: 16px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
         }
 
-        /* --- BOX COVER/LOGO --- */
+        /* --- LOGO / COVER BOX --- */
         .logo-box {
-            width: 90px;  
-            height: 90px; 
-            border-radius: 8px;
+            width: 72px;
+            height: 72px;
+            border-radius: 12px;
             overflow: hidden;
-            background: #000000;
+            background: #111111;
             flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
         .logo-box video, .logo-box img {
             width: 100%;
@@ -69,16 +71,14 @@
             display: none;
         }
 
-        /* --- INFO BRANO E CONTROLLI INTERNI --- */
+        /* --- INFO BRANO & TESTI --- */
         .info-box {
             flex-grow: 1;
             min-width: 0;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
-            gap: 6px;
+            gap: 4px;
         }
 
         .scroll-container {
@@ -87,166 +87,156 @@
             white-space: nowrap;
             text-align: left;
         }
+        
         .scroll-wrapper {
             display: inline-flex;
             align-items: center;
             white-space: nowrap;
             will-change: transform;
-            justify-content: flex-start;
         }
 
         .info-box h2 {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: #000000;
-            line-height: 1.2;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.3px;
         }
+
         .info-box p {
             font-size: 0.85rem;
-            color: #333333;
-            font-weight: 600;
+            color: #dddddd;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
 
         .text-item {
             white-space: nowrap;
             padding-right: 0;
         }
+
         .is-scrolling {
-            animation: marquee 12s linear infinite;
+            animation: marquee 14s linear infinite;
         }
+
         @keyframes marquee {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-50%, 0, 0); }
         }
 
-        /* --- UI BUFFERING (LE BANANE) --- */
+        /* --- BUFFERING (BANANE) --- */
         #buffering-box {
             display: none;
             flex-direction: row;
             align-items: center;
             width: 100%;
-            height: 18px;
+            height: 20px;
         }
         .buf-label {
             font-size: 0.8rem;
             font-weight: 800;
             color: #ffa500;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
         .buf-bananas {
-            font-size: 0.8rem;
-            margin-left: 5px;
+            font-size: 0.85rem;
+            margin-left: 6px;
             white-space: nowrap;
         }
 
-        /* --- CONTROLLI POSIZIONATI SOTTO IL TITOLO --- */
-        .actions-box {
+        /* --- CONTROLLI E PULSANTI --- */
+        .controls-box {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 4px;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .play-btn {
-            background: #000000; 
+            background: #ffffff;
             border: none;
-            color: #ffffff; 
-            width: 38px;
-            height: 38px;
+            color: #000000;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s ease, background-color 0.2s ease;
         }
+        .play-btn:hover { background: #f0f0f0; }
         .play-btn:active { transform: scale(0.92); }
-        .play-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        .play-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
         @keyframes spin-anim { 100% { transform: rotate(360deg); } }
         .spin { animation: spin-anim 1s linear infinite; transform-origin: center; }
 
         .status-badge {
-            font-size: 0.65rem;
-            padding: 4px 8px;
-            border-radius: 4px;
+            font-size: 0.7rem;
+            padding: 5px 10px;
+            border-radius: 6px;
             font-weight: 700;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             text-align: center;
             color: #ffffff;
-            background: #555555;
-            transition: background-color 0.3s ease;
+            background: #333333;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
 <body>
 
-    <!-- VIDEO DI SFONDO DA ARCHIVE.ORG -->
+    <!-- VIDEO DI SFONDO -->
     <video class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" preload="auto" loop muted playsinline autoplay></video>
 
     <div class="player-bar">
-        <!-- Logo Video o Copertina nel Box Laterale -->
+        <!-- LOGO / COVER -->
         <div class="logo-box">
             <video id="coverVideo" src="https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4" preload="auto" loop muted playsinline autoplay></video>
             <img id="coverImg" alt="Cover">
         </div>
 
+        <!-- INFO TRACCIA -->
         <div class="info-box">
-            <!-- TITOLO RADIO -->
             <div class="scroll-container" id="title-container">
                 <div class="scroll-wrapper" id="title-wrapper">
                     <h2><span class="text-item" id="main-title">Monkey Radio Italy</span></h2>
                 </div>
             </div>
             
-            <!-- TITOLO BRANO -->
             <div class="scroll-container" id="track-container">
                 <div class="scroll-wrapper" id="track-wrapper">
                     <p><span class="text-item" id="track-title">Diretta Streaming</span></p>
                 </div>
             </div>
 
-            <!-- LE BANANE (BUFFERING) -->
+            <!-- BUFFERING BANANE -->
             <div id="buffering-box">
-                <div class="buf-label">WAIT</div>
+                <div class="buf-label">ATTENDI</div>
                 <div class="buf-bananas" id="bananas"></div>
             </div>
+        </div>
 
-            <!-- CONTROLLI SUBITO SOTTO IL TITOLO CANZONE -->
-            <div class="actions-box">
-                <button class="play-btn" id="playBtn" aria-label="Riproduci">
-                    <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <div class="status-badge" id="statusTag">STOP</div>
-            </div>
+        <!-- CONTROLLI A DESTRA -->
+        <div class="controls-box">
+            <div class="status-badge" id="statusTag">STOP</div>
+            <button class="play-btn" id="playBtn" aria-label="Riproduci">
+                <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
         </div>
     </div>
 
     <audio id="audioStream" crossorigin="anonymous" preload="none"></audio>
 
     <script>
-        // === CANALE SINCRONIZZAZIONE CROSS-WINDOW ===
-        const radioChannel = new BroadcastChannel('monkey_radio_stream');
-
-        function broadcastState(state) {
-            radioChannel.postMessage({
-                state: state,
-                songInfo: currentSongInfo,
-                coverUrl: currentCoverUrl
-            });
-        }
-
-        // === CONFIGURAZIONI CORE ===
         const STREAM_URL = "https://a11.asurahosting.com:8610/radio.mp3";
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
         const DEFAULT_VIDEO = "https://assets.nicepagecdn.com/966432fa/6080027/files/OK_QR_NICE_LONG.mp4";
         const PAUSE_THRESHOLD = 30000;
 
-        // Elementi DOM
         const audio = document.getElementById('audioStream');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
@@ -260,36 +250,45 @@
         const coverVideo = document.getElementById('coverVideo');
         const coverImg = document.getElementById('coverImg');
 
-        // SVG
         const playSVG = '<path d="M8 5v14l11-7z"/>';
         const pauseSVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         const spinnerSVG = '<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>';
 
-        let wakeLock = null; let userIntentPlay = false; let reconnectTimer = null;
-        let pauseTime = 0; let bananaInterval = null;
-        let currentSongInfo = "Diretta Streaming"; let currentCoverUrl = null;
+        let wakeLock = null; 
+        let userIntentPlay = false; 
+        let reconnectTimer = null;
+        let pauseTime = 0; 
+        let bananaInterval = null;
+        let currentSongInfo = "Diretta Streaming"; 
+        let currentCoverUrl = null;
 
-        // === 1. TESTI SCORREVOLI ===
+        // Gestione testi scorrevoli condizionali (marquee solo se necessario)
         function applySmartMarquee(container, wrapper, idPrefix, originalText) {
-            wrapper.classList.remove('is-scrolling'); wrapper.innerHTML = '';
+            wrapper.classList.remove('is-scrolling'); 
+            wrapper.innerHTML = '';
+            
             const item = document.createElement('span');
-            item.className = 'text-item'; item.id = idPrefix; 
-            item.textContent = originalText; item.style.paddingRight = "0px";
+            item.className = 'text-item'; 
+            item.id = idPrefix; 
+            item.textContent = originalText; 
+            item.style.paddingRight = "0px";
             wrapper.appendChild(item);
 
             if (item.offsetWidth > container.offsetWidth) {
-                item.textContent = originalText + '  🐵  '; item.style.paddingRight = "30px";
+                item.textContent = originalText + '  🐵  '; 
+                item.style.paddingRight = "30px";
                 wrapper.appendChild(item.cloneNode(true));
                 wrapper.classList.add('is-scrolling');
             }
         }
+
         function updateTexts(songText) {
             applySmartMarquee(titleContainer, titleWrapper, 'main-title', "Monkey Radio Italy");
             applySmartMarquee(trackContainer, trackWrapper, 'track-title', songText);
         }
+
         window.addEventListener('resize', () => updateTexts(currentSongInfo));
 
-        // === 2. LETTURA TITOLO DA ASURAHOSTING ===
         async function fetchSongData() {
             try {
                 const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
@@ -310,7 +309,6 @@
             } catch (err) { console.error("API Server non raggiungibile:", err); }
         }
 
-        // === 3. RICERCA COVER SU ITUNES ===
         async function processNewSong(songName) {
             let coverUrl = null;
             if (songName !== "Diretta Streaming") {
@@ -323,25 +321,27 @@
                 } catch (e) {}
             }
             if (coverUrl) { 
-                coverImg.src = coverUrl; coverImg.style.display = 'block'; 
-                coverVideo.style.display = 'none'; currentCoverUrl = coverUrl; 
+                coverImg.src = coverUrl; 
+                coverImg.style.display = 'block'; 
+                coverVideo.style.display = 'none'; 
+                currentCoverUrl = coverUrl; 
             } else { 
-                coverImg.style.display = 'none'; coverVideo.style.display = 'block'; 
+                coverImg.style.display = 'none'; 
+                coverVideo.style.display = 'block'; 
                 currentCoverUrl = null; 
             }
             updateTexts(songName);
             if (userIntentPlay || !audio.paused) updateMediaSession();
-            
-            broadcastState(userIntentPlay ? 'playing' : 'stopped');
         }
 
-        setInterval(fetchSongData, 10000); fetchSongData();
+        setInterval(fetchSongData, 10000); 
+        fetchSongData();
 
-        // === 4. UI BANANE & STATI ===
         function startBananas() {
             trackContainer.style.display = 'none';
             bufferingBox.style.display = 'flex';
-            clearInterval(bananaInterval); let bCount = 0;
+            clearInterval(bananaInterval); 
+            let bCount = 0;
             bananaInterval = setInterval(() => {
                 bCount++;
                 const maxBananas = window.innerWidth <= 480 ? 3 : 6;
@@ -349,80 +349,123 @@
                 bananasEl.textContent = '🍌'.repeat(bCount);
             }, 400);
         }
+
         function stopBananas() {
             clearInterval(bananaInterval);
             bufferingBox.style.display = 'none';
             trackContainer.style.display = 'block';
         }
-        function setStatus(text, color) { statusTag.innerText = text; statusTag.style.background = color; }
+
+        function setStatus(text, color) { 
+            statusTag.innerText = text; 
+            statusTag.style.background = color; 
+        }
         
         function setUIState(state) {
             if (state === 'loading') { 
                 playIcon.innerHTML = spinnerSVG; 
                 playIcon.classList.add('spin'); 
-                setStatus("WAIT", "#ffa500"); 
+                setStatus("ATTENDI", "#ffa500"); 
                 startBananas(); 
-                broadcastState('loading');
             } 
             else if (state === 'playing') { 
                 playIcon.innerHTML = pauseSVG; 
                 playIcon.classList.remove('spin'); 
                 setStatus("LIVE", "#e53e3e"); 
                 stopBananas(); 
-                broadcastState('playing');
             } 
             else if (state === 'stopped') { 
                 playIcon.innerHTML = playSVG; 
                 playIcon.classList.remove('spin'); 
-                setStatus("STOP", "#555555"); 
+                setStatus("STOP", "#333333"); 
                 stopBananas(); 
-                broadcastState('stopped');
             }
         }
 
-        // === 5. GESTIONE STREAM AUDIO ===
-        function hardStop() { audio.pause(); audio.removeAttribute('src'); audio.load(); }
+        function hardStop() { 
+            audio.pause(); 
+            audio.removeAttribute('src'); 
+            audio.load(); 
+        }
+
         function togglePlay() {
             let now = Date.now();
             if (!userIntentPlay) {
-                userIntentPlay = true; setUIState('loading');
-                if (!audio.src || (now - pauseTime > PAUSE_THRESHOLD)) { hardStop(); audio.src = `${STREAM_URL}?t=${now}`; }
-                audio.play().then(() => { requestWakeLock(); updateMediaSession(); }).catch(err => { userIntentPlay = false; setUIState('stopped'); });
+                userIntentPlay = true; 
+                setUIState('loading');
+                if (!audio.src || (now - pauseTime > PAUSE_THRESHOLD)) { 
+                    hardStop(); 
+                    audio.src = `${STREAM_URL}?t=${now}`; 
+                }
+                audio.play().then(() => { 
+                    requestWakeLock(); 
+                    updateMediaSession(); 
+                }).catch(err => { 
+                    userIntentPlay = false; 
+                    setUIState('stopped'); 
+                });
             } else {
-                userIntentPlay = false; pauseTime = Date.now(); clearTimeout(reconnectTimer); audio.pause(); setUIState('stopped'); releaseWakeLock();
+                userIntentPlay = false; 
+                pauseTime = Date.now(); 
+                clearTimeout(reconnectTimer); 
+                audio.pause(); 
+                setUIState('stopped'); 
+                releaseWakeLock();
             }
         }
+        
         playBtn.addEventListener('click', togglePlay);
 
-        // === 6. AUTO RECONNECT DI RETE ===
         function forceReconnect() {
             if (!userIntentPlay) return;
-            setUIState('loading'); hardStop(); audio.src = `${STREAM_URL}?t=${Date.now()}`;
-            audio.play().catch(() => { reconnectTimer = setTimeout(forceReconnect, 3000); });
+            setUIState('loading'); 
+            hardStop(); 
+            audio.src = `${STREAM_URL}?t=${Date.now()}`;
+            audio.play().catch(() => { 
+                reconnectTimer = setTimeout(forceReconnect, 3000); 
+            });
         }
+
         audio.addEventListener('error', () => { if (userIntentPlay) { clearTimeout(reconnectTimer); reconnectTimer = setTimeout(forceReconnect, 2000); } });
         audio.addEventListener('waiting', () => { if (userIntentPlay) setUIState('loading'); });
         audio.addEventListener('stalled', () => { if (userIntentPlay) { setUIState('loading'); clearTimeout(reconnectTimer); reconnectTimer = setTimeout(forceReconnect, 4000); } });
         audio.addEventListener('playing', () => { if (userIntentPlay) { clearTimeout(reconnectTimer); setUIState('playing'); } });
         audio.addEventListener('pause', () => { if (userIntentPlay && audio.readyState > 0) { userIntentPlay = false; pauseTime = Date.now(); clearTimeout(reconnectTimer); setUIState('stopped'); } });
 
-        // === 7. BLUETOOTH E LOCKSCREEN ===
         function updateMediaSession() {
             if ('mediaSession' in navigator) {
-                let title = currentSongInfo; let artist = "Monkey Radio Italy";
+                let title = currentSongInfo; 
+                let artist = "Monkey Radio Italy";
                 if (currentSongInfo.includes(" - ")) {
-                    let parts = currentSongInfo.split(" - "); artist = parts[0].trim(); title = parts.slice(1).join(" - ").trim();
-                } else if (currentSongInfo !== "Diretta Streaming") { artist = "In Diretta"; }
+                    let parts = currentSongInfo.split(" - "); 
+                    artist = parts[0].trim(); 
+                    title = parts.slice(1).join(" - ").trim();
+                } else if (currentSongInfo !== "Diretta Streaming") { 
+                    artist = "In Diretta"; 
+                }
                 let artworkArr = currentCoverUrl ? [ { src: currentCoverUrl, sizes: '512x512', type: 'image/jpeg' } ] : [ { src: DEFAULT_VIDEO, sizes: '512x512', type: 'video/mp4' } ];
                 navigator.mediaSession.metadata = new MediaMetadata({ title: title, artist: artist, album: 'Monkey Radio', artwork: artworkArr });
-                navigator.mediaSession.setActionHandler('play', togglePlay); navigator.mediaSession.setActionHandler('pause', togglePlay);
+                navigator.mediaSession.setActionHandler('play', togglePlay); 
+                navigator.mediaSession.setActionHandler('pause', togglePlay);
             }
         }
         
-        // === 8. PREVENZIONE STANDBY SCHERMO ===
-        async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } }
-        function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
-        document.addEventListener('visibilitychange', async () => { if (wakeLock !== null && document.visibilityState === 'visible' && !audio.paused) await requestWakeLock(); });
+        async function requestWakeLock() { 
+            if ('wakeLock' in navigator) { 
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} 
+            } 
+        }
+        
+        function releaseWakeLock() { 
+            if (wakeLock !== null) { 
+                wakeLock.release(); 
+                wakeLock = null; 
+            } 
+        }
+        
+        document.addEventListener('visibilitychange', async () => { 
+            if (wakeLock !== null && document.visibilityState === 'visible' && !audio.paused) await requestWakeLock(); 
+        });
         
         window.addEventListener('DOMContentLoaded', () => updateTexts("Diretta Streaming"));
     </script>
