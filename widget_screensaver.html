@@ -176,13 +176,13 @@
         .slide-from-left {
             display: inline-block;
             transform: translateX(-100%);
-            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
+            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.7s;
         }
 
         .slide-from-right {
             display: inline-block;
             transform: translateX(100%);
-            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
+            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 1.4s;
         }
 
         @keyframes slideInLeft { to { transform: translateX(0); } }
@@ -197,12 +197,13 @@
             border-radius: 10px;
             letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
-            animation: liveBlink 1s infinite ease-in-out;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: liveAppear 0.5s cubic-bezier(0.77, 0, 0.175, 1) forwards 1.05s;
         }
 
-        @keyframes liveBlink {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.96); }
+        @keyframes liveAppear {
+            to { opacity: 1; transform: scale(1); }
         }
 
         .row-station-name {
@@ -300,7 +301,6 @@
             letter-spacing: 2px;
             margin-bottom: 16px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
-            animation: liveBlink 1.2s infinite ease-in-out;
         }
 
         .artist-line-wrapper, .title-line-wrapper, .show-line-wrapper {
@@ -381,10 +381,13 @@
 <body>
 
     <div class="monkey-stage">
+        <!-- VIDEO DI SFONDO E PATINA SCURA -->
         <video id="bgVideo" class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" autoplay muted loop playsinline></video>
         <div class="bg-overlay"></div>
 
+        <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
+            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
             <div id="sceneShow" class="scene-show">
                 <div class="show-logo-mask">
                     <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
@@ -400,6 +403,7 @@
                 </div>
             </div>
 
+            <!-- SCENA 2: COVER & TRACK INFO -->
             <div id="sceneTrack" class="scene-track">
                 <div class="cover-wrapper">
                     <img id="trackCover" class="cover-img" src="" alt="Cover">
@@ -419,6 +423,7 @@
             </div>
         </div>
 
+        <!-- PULSANTE FULLSCREEN -->
         <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
             <svg id="fsIcon" viewBox="0 0 24 24">
                 <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
@@ -560,8 +565,8 @@
             sceneTrack.classList.remove('slide-in');
             sceneShow.classList.remove('slide-out');
             const showDetails = getCurrentShowDetails();
-            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
-            typeWriterText(currentShowContainer, showDetails.name, 1.6);
+            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.6);
+            typeWriterText(currentShowContainer, showDetails.name, 2.1);
         }
 
         function triggerTrackScene(artist, title, showName, coverUrl) {
