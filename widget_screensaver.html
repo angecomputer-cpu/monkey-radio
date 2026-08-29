@@ -376,10 +376,13 @@
 <body>
 
     <div class="monkey-stage">
+        <!-- VIDEO DI SFONDO E PATINA SCURA -->
         <video id="bgVideo" class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" autoplay muted loop playsinline></video>
         <div class="bg-overlay"></div>
 
+        <!-- FULLSCREEN REACTIVE BOX -->
         <div class="screensaver-info">
+            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
             <div id="sceneShow" class="scene-show">
                 <div class="show-logo-mask">
                     <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
@@ -395,6 +398,7 @@
                 </div>
             </div>
 
+            <!-- SCENA 2: COVER & TRACK INFO -->
             <div id="sceneTrack" class="scene-track">
                 <div class="cover-wrapper">
                     <img id="trackCover" class="cover-img" src="" alt="Cover">
@@ -414,6 +418,7 @@
             </div>
         </div>
 
+        <!-- PULSANTE FULLSCREEN -->
         <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
             <svg id="fsIcon" viewBox="0 0 24 24">
                 <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
@@ -425,7 +430,7 @@
     (function() {
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
 
-        // CONFIGURAZIONE LOGHI E NOMI SHOW DAL PALINSESTO
+        // LOGHI E ASSET DA TABELLA PALINSESTO
         const LOGO_DEFAULT = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
         
         const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
@@ -443,6 +448,7 @@
         const stationNameContainer = document.getElementById('stationNameContainer');
         const currentShowContainer = document.getElementById('currentShowContainer');
         const trackCover = document.getElementById('trackCover');
+        const bgVideo = document.getElementById('bgVideo');
         
         const artistWrapper = document.getElementById('artistWrapper');
         const artistContainer = document.getElementById('artistContainer');
@@ -461,6 +467,10 @@
             enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
             exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
         };
+
+        if (bgVideo) {
+            bgVideo.play().catch(() => {});
+        }
 
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
@@ -489,6 +499,7 @@
         function getCurrentShowDetails() {
             const hour = getRomeHour();
             
+            // Mappatura esatta basata sulla tabella ufficiale del palinsesto
             if (hour >= 0 && hour < 6) {
                 return { logo: LOGO_ARCHIVE, name: NAME_ARCHIVE };
             } else if (hour >= 6 && hour < 9) {
@@ -502,12 +513,18 @@
             } else if (hour >= 18 && hour < 21) {
                 return { logo: LOGO_CERTIFIED, name: NAME_CERTIFIED };
             } else {
-                return { logo: LOGO_EVERYDAY, name: NAME_EVERYDAY };
+                return { logo: LOGO_EVERYDAY, name: NAME_EVERYDAY }; // 21:00 - 00:00
             }
         }
 
         function updateShowLogo() {
             const details = getCurrentShowDetails();
+            
+            if (lastActiveShowName !== details.name) {
+                lastActiveShowName = details.name;
+                triggerShowScene();
+            }
+
             if (showLogo.src !== details.logo) {
                 showLogo.src = details.logo;
             }
@@ -578,11 +595,7 @@
                 }
             } catch (err) {}
 
-            const currentDetails = getCurrentShowDetails();
-            if (lastActiveShowName !== currentDetails.name) {
-                lastActiveShowName = currentDetails.name;
-                currentRawInfo = null; 
-            }
+            updateShowLogo();
 
             if (rawInfo !== currentRawInfo) {
                 currentRawInfo = rawInfo;
@@ -591,9 +604,7 @@
         }
 
         async function processNewSong(rawInfo) {
-            updateShowLogo();
             const showDetails = getCurrentShowDetails();
-            
             const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Live Streaming" || !rawInfo.includes(" - "));
 
             if (isGenericStream) {
@@ -627,7 +638,7 @@
         fetchSongData();
 
         setInterval(fetchSongData, 10000);
-        setInterval(updateShowLogo, 15000);
+        setInterval(updateShowLogo, 10000);
     })();
     </script>
 </body>
