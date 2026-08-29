@@ -431,12 +431,17 @@
     (function() {
         const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
 
-        // LOGO E NOME SHOW PER STREAMING DIRETTA E ARCHIVE
-        const LOGO_STREAM = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
-        const NAME_STREAM = "Monkey House Everyday";
-
+        // CONFIGURAZIONE ASSET E PALINSESTO
+        const LOGO_DEFAULT = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
+        
         const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
         const NAME_ARCHIVE = "Monkey Archive";
+
+        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png"; // O logo dedicato se disponibile
+        const NAME_CERTIFIED = "Monkey House Certified";
+
+        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
+        const NAME_EVERYDAY = "Monkey House Everyday";
 
         const sceneShow = document.getElementById('sceneShow');
         const sceneTrack = document.getElementById('sceneTrack');
@@ -455,7 +460,7 @@
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const fsIcon = document.getElementById('fsIcon');
 
-        let currentRawInfo = null; // Partiamo da null per evitare il doppio avvio a vuoto e lo scatto
+        let currentRawInfo = null;
 
         const icons = {
             enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
@@ -488,12 +493,23 @@
 
         function getCurrentShowDetails() {
             const hour = getRomeHour();
-            // Fascia oraria Monkey Archive: dalle 00:00 alle 06:00 e dalle 12:00 alle 14:00
-            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
+            
+            // Tabella Palinsesto esatta
+            if (hour >= 0 && hour < 6) {
                 return { logo: LOGO_ARCHIVE, name: NAME_ARCHIVE };
+            } else if (hour >= 6 && hour < 9) {
+                return { logo: LOGO_CERTIFIED, name: NAME_CERTIFIED };
+            } else if (hour >= 9 && hour < 12) {
+                return { logo: LOGO_EVERYDAY, name: NAME_EVERYDAY };
+            } else if (hour >= 12 && hour < 14) {
+                return { logo: LOGO_ARCHIVE, name: NAME_ARCHIVE };
+            } else if (hour >= 14 && hour < 18) {
+                return { logo: LOGO_EVERYDAY, name: NAME_EVERYDAY };
+            } else if (hour >= 18 && hour < 21) {
+                return { logo: LOGO_CERTIFIED, name: NAME_CERTIFIED };
+            } else {
+                return { logo: LOGO_EVERYDAY, name: NAME_EVERYDAY }; // 21:00 - 00:00
             }
-            // Altrimenti logo e nome di streaming standard
-            return { logo: LOGO_STREAM, name: NAME_STREAM };
         }
 
         function updateShowLogo() {
@@ -607,7 +623,6 @@
             }
         }
 
-        // Avvio pulito iniziale senza doppi trigger forzati
         updateShowLogo();
         fetchSongData();
 
