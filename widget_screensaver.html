@@ -1,624 +1,607 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monkey Radio - Fullscreen Screensaver Player</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+body, html {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background-color: #0d0d0d;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        user-select: none;
+    }
 
-        body, html {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #0d0d0d;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-        }
+    .monkey-stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background-color: #0d0d0d;
+        overflow: hidden;
+    }
 
-        .monkey-stage {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background-color: #0d0d0d;
-            overflow: hidden;
-        }
+    /* CONTAINER YOUTUBE FULLSCREEN TRASPARENTE */
+    .youtube-bg-wrapper {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100vw;
+        height: 56.25vw;
+        min-height: 100vh;
+        min-width: 177.77vh;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1;
+    }
 
-        /* CONTAINER YOUTUBE FULLSCREEN TRASPARENTE */
-        .youtube-bg-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 56.25vw;
-            min-height: 100vh;
-            min-width: 177.77vh;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 1;
-        }
+    .youtube-bg-wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        opacity: 0.45;
+    }
 
-        .youtube-bg-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            opacity: 0.45;
-        }
+    /* OVERLAY SCURO LEGGERO */
+    .brand-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.5) 100%),
+                    linear-gradient(to top, rgba(248, 205, 24, 0.05) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 2;
+    }
 
-        /* OVERLAY SCURO LEGGERO */
-        .brand-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.5) 100%),
-                        linear-gradient(to top, rgba(248, 205, 24, 0.05) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 2;
-        }
+    /* BOX PRINCIPALE FULLSCREEN */
+    .screensaver-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10;
+        background: rgba(15, 15, 15, 0.25);
+        backdrop-filter: blur(4px);
+        overflow: hidden;
+    }
 
-        /* BOX PRINCIPALE FULLSCREEN */
-        .screensaver-info {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 10;
-            background: rgba(15, 15, 15, 0.25);
-            backdrop-filter: blur(4px);
-            overflow: hidden;
-        }
+    /* PULSANTE FULLSCREEN IN BASSO AL CENTRO */
+    .fullscreen-btn {
+        position: absolute;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        background: rgba(20, 20, 20, 0.6);
+        border: 2px solid #f8cd18;
+        color: #f8cd18;
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        transition: all 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+    }
 
-        /* PULSANTE FULLSCREEN IN BASSO A DESTRA */
-        .fullscreen-btn {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            z-index: 999;
-            background: rgba(20, 20, 20, 0.6);
-            border: 2px solid #f8cd18;
-            color: #f8cd18;
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            transition: all 0.3s cubic-bezier(0.77, 0, 0.175, 1);
-        }
+    .fullscreen-btn:hover {
+        background: #f8cd18;
+        color: #0d0d0d;
+        transform: translateX(-50%) scale(1.08);
+        box-shadow: 0 10px 25px rgba(248, 205, 24, 0.4);
+    }
 
-        .fullscreen-btn:hover {
-            background: #f8cd18;
-            color: #0d0d0d;
-            transform: scale(1.08);
-            box-shadow: 0 10px 25px rgba(248, 205, 24, 0.4);
-        }
+    .fullscreen-btn svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+        transition: transform 0.3s ease;
+    }
 
-        .fullscreen-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-            transition: transform 0.3s ease;
-        }
+    /* SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO */
+    .scene-show {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
+        align-items: center;
+        justify-items: center;
+        padding: 0 5vw;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
+        transform: translateX(0);
+        opacity: 1;
+    }
 
-        /* SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO */
-        .scene-show {
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
-            align-items: center;
-            justify-items: center;
-            padding: 0 5vw;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
-            transform: translateX(0);
+    .scene-show.slide-out {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    .show-logo-mask {
+        height: 55vh;
+        width: 35vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+        animation: maskRevealRightToLeft 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+    }
+
+    @keyframes maskRevealRightToLeft {
+        to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    }
+
+    .show-logo-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .live-text-block {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 2vh;
+        padding-left: 2vw;
+        padding-right: 6vw; /* MARGINE DESTRO DI SICUREZZA */
+    }
+
+    .row-live-now {
+        display: flex;
+        align-items: center;
+        gap: 1.5vw;
+        font-size: 2.5vw;
+        font-weight: 900;
+        color: #ffffff;
+        text-transform: uppercase;
+        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+    }
+
+    .box-slide-mask {
+        display: inline-block;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .slide-from-left {
+        display: inline-block;
+        transform: translateX(-100%);
+        animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
+    }
+
+    .slide-from-right {
+        display: inline-block;
+        transform: translateX(100%);
+        animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
+    }
+
+    @keyframes slideInLeft {
+        to { transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+        to { transform: translateX(0); }
+    }
+
+    .badge-live-flash {
+        font-size: 1.8vw;
+        font-weight: 900;
+        color: #ffffff;
+        background-color: #ff0000;
+        padding: 4px 18px;
+        border-radius: 10px;
+        letter-spacing: 2px;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
+        animation: liveBlink 1s infinite ease-in-out;
+    }
+
+    @keyframes liveBlink {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.96); }
+    }
+
+    .row-station-name {
+        font-size: 3.8vw;
+        font-weight: 900;
+        color: #f8cd18;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        white-space: nowrap;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+    }
+
+    .char-reveal {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(15px);
+        animation: letterAppear 0.3s forwards ease-out;
+    }
+
+    @keyframes letterAppear {
+        to {
             opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .scene-show.slide-out {
-            transform: translateX(-100%);
-            opacity: 0;
+    /* SCENA 2: COVER & TRACK INFO */
+    .scene-track {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
+        align-items: center;
+        justify-items: center;
+        padding: 0 5vw;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    .scene-track.slide-in {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .cover-wrapper {
+        width: 44vh;
+        height: 44vh;
+        max-width: 28vw;
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 4px solid #f8cd18;
+        background: #111111;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+        clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+        animation: maskRevealRightToLeft 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
+    }
+
+    .cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .track-metadata {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: left;
+        padding-left: 1.5vw;
+        padding-right: 6vw; /* AMPIO MARGINE A DESTRA PER EVITARE IL TAGLIO DEL TESTO */
+        overflow: hidden;
+    }
+
+    .badge-live-mini {
+        font-size: 1.2vw;
+        font-weight: 900;
+        color: #ffffff;
+        background-color: #ff0000;
+        padding: 6px 18px;
+        border-radius: 10px;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
+        animation: liveBlink 1.2s infinite ease-in-out;
+    }
+
+    .artist-line-wrapper, .title-line-wrapper {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        white-space: nowrap;
+        text-align: left;
+        margin-bottom: 8px;
+    }
+
+    .title-line-wrapper {
+        margin-bottom: 0;
+    }
+
+    .track-artist, .track-title {
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .track-artist {
+        font-size: 2vw;
+        font-weight: 800;
+        color: #f8cd18;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        line-height: 1.25;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    }
+
+    .track-title {
+        font-size: 3.2vw;
+        font-weight: 900;
+        color: #ffffff;
+        line-height: 1.15;
+        letter-spacing: -0.5px;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+    }
+
+    .is-overflowing {
+        animation: marqueeScroll 12s linear infinite;
+    }
+
+    @keyframes marqueeScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 768px) {
+        .scene-show, .scene-track {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr;
+            padding: 4vh 4vw;
         }
+        .show-logo-mask { width: 80vw; height: 35vh; }
+        .live-text-block { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
+        .row-live-now { font-size: 4vw; gap: 2vw; }
+        .badge-live-flash { font-size: 3vw; padding: 2px 10px; }
+        .row-station-name { font-size: 5vw; }
+        .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
+        .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
+        .artist-line-wrapper, .title-line-wrapper { text-align: center; }
+        .track-artist { font-size: 3.5vw; }
+        .track-title { font-size: 5vw; }
+        .badge-live-mini { font-size: 2.8vw; padding: 4px 12px; }
+        .fullscreen-btn { bottom: 15px; width: 42px; height: 42px; }
+    }
+</style>
+<div class="monkey-stage">
+    <!-- YOUTUBE VIDEO BACKGROUND -->
+    <div class="youtube-bg-wrapper">
+        <iframe src="[https://www.youtube.com/embed/6KrEqSrN-TE?autoplay=1&mute=1&controls=0&loop=1&playlist=6KrEqSrN-TE&enablejsapi=1&rel=0&showinfo=0](https://www.youtube.com/embed/6KrEqSrN-TE?autoplay=1&mute=1&controls=0&loop=1&playlist=6KrEqSrN-TE&enablejsapi=1&rel=0&showinfo=0)" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+        </iframe>
+    </div>
+    
+    <div class="brand-overlay"></div>
 
-        .show-logo-mask {
-            height: 55vh;
-            width: 35vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
-            animation: maskRevealRightToLeft 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-        }
-
-        @keyframes maskRevealRightToLeft {
-            to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        }
-
-        .show-logo-img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-
-        .live-text-block {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 2vh;
-            padding-left: 2vw;
-            padding-right: 6vw; /* MARGINE DESTRO DI SICUREZZA */
-        }
-
-        .row-live-now {
-            display: flex;
-            align-items: center;
-            gap: 1.5vw;
-            font-size: 2.5vw;
-            font-weight: 900;
-            color: #ffffff;
-            text-transform: uppercase;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
-        }
-
-        .box-slide-mask {
-            display: inline-block;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .slide-from-left {
-            display: inline-block;
-            transform: translateX(-100%);
-            animation: slideInLeft 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
-        }
-
-        .slide-from-right {
-            display: inline-block;
-            transform: translateX(100%);
-            animation: slideInRight 0.7s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.9s;
-        }
-
-        @keyframes slideInLeft {
-            to { transform: translateX(0); }
-        }
-
-        @keyframes slideInRight {
-            to { transform: translateX(0); }
-        }
-
-        .badge-live-flash {
-            font-size: 1.8vw;
-            font-weight: 900;
-            color: #ffffff;
-            background-color: #ff0000;
-            padding: 4px 18px;
-            border-radius: 10px;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
-            animation: liveBlink 1s infinite ease-in-out;
-        }
-
-        @keyframes liveBlink {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.96); }
-        }
-
-        .row-station-name {
-            font-size: 3.8vw;
-            font-weight: 900;
-            color: #f8cd18;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            white-space: nowrap;
-            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
-        }
-
-        .char-reveal {
-            display: inline-block;
-            opacity: 0;
-            transform: translateY(15px);
-            animation: letterAppear 0.3s forwards ease-out;
-        }
-
-        @keyframes letterAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* SCENA 2: COVER & TRACK INFO */
-        .scene-track {
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 38vw 52vw; /* GRIGLIA ACCORCIATA A DESTRA */
-            align-items: center;
-            justify-items: center;
-            padding: 0 5vw;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
-            transform: translateX(100%);
-            opacity: 0;
-        }
-
-        .scene-track.slide-in {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .cover-wrapper {
-            width: 44vh;
-            height: 44vh;
-            max-width: 28vw;
-            position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 4px solid #f8cd18;
-            background: #111111;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
-            clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
-            animation: maskRevealRightToLeft 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.2s;
-        }
-
-        .cover-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .track-metadata {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            text-align: left;
-            padding-left: 1.5vw;
-            padding-right: 6vw; /* AMPIO MARGINE A DESTRA PER EVITARE IL TAGLIO DEL TESTO */
-            overflow: hidden;
-        }
-
-        .badge-live-mini {
-            font-size: 1.2vw;
-            font-weight: 900;
-            color: #ffffff;
-            background-color: #ff0000;
-            padding: 6px 18px;
-            border-radius: 10px;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
-            animation: liveBlink 1.2s infinite ease-in-out;
-        }
-
-        .artist-line-wrapper, .title-line-wrapper {
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-            white-space: nowrap;
-            text-align: left;
-            margin-bottom: 8px;
-        }
-
-        .title-line-wrapper {
-            margin-bottom: 0;
-        }
-
-        .track-artist, .track-title {
-            display: inline-block;
-            white-space: nowrap;
-        }
-
-        .track-artist {
-            font-size: 2vw;
-            font-weight: 800;
-            color: #f8cd18;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.25;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-        }
-
-        .track-title {
-            font-size: 3.2vw;
-            font-weight: 900;
-            color: #ffffff;
-            line-height: 1.15;
-            letter-spacing: -0.5px;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-        }
-
-        .is-overflowing {
-            animation: marqueeScroll 12s linear infinite;
-        }
-
-        @keyframes marqueeScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        @media (max-width: 768px) {
-            .scene-show, .scene-track {
-                grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr;
-                padding: 4vh 4vw;
-            }
-            .show-logo-mask { width: 80vw; height: 35vh; }
-            .live-text-block { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .row-live-now { font-size: 4vw; gap: 2vw; }
-            .badge-live-flash { font-size: 3vw; padding: 2px 10px; }
-            .row-station-name { font-size: 5vw; }
-            .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
-            .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .artist-line-wrapper, .title-line-wrapper { text-align: center; }
-            .track-artist { font-size: 3.5vw; }
-            .track-title { font-size: 5vw; }
-            .badge-live-mini { font-size: 2.8vw; padding: 4px 12px; }
-            .fullscreen-btn { bottom: 15px; right: 15px; width: 42px; height: 42px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="monkey-stage">
-        <!-- YOUTUBE VIDEO BACKGROUND -->
-        <div class="youtube-bg-wrapper">
-            <iframe src="https://www.youtube.com/embed/clVB4yj1vks?autoplay=1&mute=1&controls=0&loop=1&playlist=clVB4yj1vks&enablejsapi=1&rel=0&showinfo=0" 
-                    allow="autoplay; encrypted-media" 
-                    allowfullscreen>
-            </iframe>
-        </div>
-        
-        <div class="brand-overlay"></div>
-
-        <!-- FULLSCREEN REACTIVE BOX -->
-        <div class="screensaver-info">
-            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
-            <div id="sceneShow" class="scene-show">
-                <div class="show-logo-mask">
-                    <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
-                </div>
-                <div class="live-text-block">
-                    <div class="row-live-now">
-                        <div class="box-slide-mask">
-                            <span class="slide-from-left">NOW</span>
-                        </div>
-                        <span class="badge-live-flash">LIVE</span>
-                        <div class="box-slide-mask">
-                            <span class="slide-from-right">ON</span>
-                        </div>
-                    </div>
-                    <div class="row-station-name" id="stationNameContainer"></div>
-                </div>
+    <!-- FULLSCREEN REACTIVE BOX -->
+    <div class="screensaver-info">
+        <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
+        <div id="sceneShow" class="scene-show">
+            <div class="show-logo-mask">
+                <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
             </div>
-
-            <!-- SCENA 2: COVER & TRACK INFO -->
-            <div id="sceneTrack" class="scene-track">
-                <div class="cover-wrapper">
-                    <img id="trackCover" class="cover-img" src="" alt="Cover">
-                </div>
-                <div class="track-metadata">
-                    <span class="badge-live-mini">NOW ON AIR</span>
-                    <div class="artist-line-wrapper" id="artistWrapper">
-                        <div class="track-artist" id="artistContainer"></div>
+            <div class="live-text-block">
+                <div class="row-live-now">
+                    <div class="box-slide-mask">
+                        <span class="slide-from-left">NOW</span>
                     </div>
-                    <div class="title-line-wrapper" id="titleWrapper">
-                        <div class="track-title" id="titleContainer"></div>
+                    <span class="badge-live-flash">LIVE</span>
+                    <div class="box-slide-mask">
+                        <span class="slide-from-right">ON</span>
                     </div>
                 </div>
+                <div class="row-station-name" id="stationNameContainer"></div>
             </div>
         </div>
 
-        <!-- PULSANTE FULLSCREEN / EXIT FULLSCREEN (IN BASSO A DESTRA) -->
-        <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
-            <svg id="fsIcon" viewBox="0 0 24 24">
-                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-            </svg>
-        </button>
+        <!-- SCENA 2: COVER & TRACK INFO -->
+        <div id="sceneTrack" class="scene-track">
+            <div class="cover-wrapper">
+                <img id="trackCover" class="cover-img" src="" alt="Cover">
+            </div>
+            <div class="track-metadata">
+                <span class="badge-live-mini">NOW ON AIR</span>
+                <div class="artist-line-wrapper" id="artistWrapper">
+                    <div class="track-artist" id="artistContainer"></div>
+                </div>
+                <div class="title-line-wrapper" id="titleWrapper">
+                    <div class="track-title" id="titleContainer"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-    (function() {
-        const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
-        const DEFAULT_COVER = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
+    <!-- PULSANTE FULLSCREEN / EXIT FULLSCREEN (IN BASSO AL CENTRO) -->
+    <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
+        <svg id="fsIcon" viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+    </button>
+</div>
 
-        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
-        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png";
-        const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio.png";
+<script>
+(function() {
+    const STATUS_JSON_URL = "[https://a11.asurahosting.com:8610/status-json.xsl](https://a11.asurahosting.com:8610/status-json.xsl)";
+    const DEFAULT_COVER = "[https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png](https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png)";
 
-        const sceneShow = document.getElementById('sceneShow');
-        const sceneTrack = document.getElementById('sceneTrack');
-        const showLogo = document.getElementById('showLogo');
-        const stationNameContainer = document.getElementById('stationNameContainer');
-        const trackCover = document.getElementById('trackCover');
-        
-        const artistWrapper = document.getElementById('artistWrapper');
-        const artistContainer = document.getElementById('artistContainer');
-        const titleWrapper = document.getElementById('titleWrapper');
-        const titleContainer = document.getElementById('titleContainer');
+    const LOGO_EVERYDAY = "[https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png](https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png)";
+    const LOGO_CERTIFIED = "[https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png](https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png)";
+    const LOGO_ARCHIVE = "[https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png](https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png)";
 
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const fsIcon = document.getElementById('fsIcon');
+    const sceneShow = document.getElementById('sceneShow');
+    const sceneTrack = document.getElementById('sceneTrack');
+    const showLogo = document.getElementById('showLogo');
+    const stationNameContainer = document.getElementById('stationNameContainer');
+    const trackCover = document.getElementById('trackCover');
+    
+    const artistWrapper = document.getElementById('artistWrapper');
+    const artistContainer = document.getElementById('artistContainer');
+    const titleWrapper = document.getElementById('titleWrapper');
+    const titleContainer = document.getElementById('titleContainer');
 
-        let currentRawInfo = "";
-        let currentArtist = "";
-        let currentTitle = "";
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const fsIcon = document.getElementById('fsIcon');
 
-        // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
-        const icons = {
-            enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
-            exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
-        };
+    let currentRawInfo = "";
+    let currentArtist = "";
+    let currentTitle = "";
 
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error("Errore nell'attivare il fullscreen:", err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        });
+    // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
+    const icons = {
+        enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
+        exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
+    };
 
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fsIcon.innerHTML = `<path d="${icons.exit}"/>`;
-                fullscreenBtn.setAttribute('title', 'Esci da Schermo Intero');
-            } else {
-                fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
-                fullscreenBtn.setAttribute('title', 'Attiva Schermo Intero');
-            }
-        });
-
-        function getRomeHour() {
-            return parseInt(new Intl.DateTimeFormat('it-IT', {
-                hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
-            }).format(new Date()));
-        }
-
-        function updateShowLogo() {
-            const hour = getRomeHour();
-            let targetLogo = LOGO_EVERYDAY;
-
-            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                targetLogo = LOGO_ARCHIVE;
-            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
-                targetLogo = LOGO_CERTIFIED;
-            }
-
-            if (showLogo.src !== targetLogo) {
-                showLogo.src = targetLogo;
-            }
-        }
-
-        function typeWriterText(targetElement, text, startDelay = 0) {
-            targetElement.innerHTML = '';
-            const chars = text.split('');
-            chars.forEach((char, index) => {
-                const span = document.createElement('span');
-                span.className = 'char-reveal';
-                span.innerHTML = char === ' ' ? '&nbsp;' : char;
-                span.style.animationDelay = `${startDelay + (index * 0.04)}s`;
-                targetElement.appendChild(span);
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error("Errore nell'attivare il fullscreen:", err);
             });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            fsIcon.innerHTML = `<path d="${icons.exit}"/>`;
+            fullscreenBtn.setAttribute('title', 'Esci da Schermo Intero');
+        } else {
+            fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
+            fullscreenBtn.setAttribute('title', 'Attiva Schermo Intero');
+        }
+    });
+
+    function getRomeHour() {
+        return parseInt(new Intl.DateTimeFormat('it-IT', {
+            hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
+        }).format(new Date()));
+    }
+
+    function updateShowLogo() {
+        const hour = getRomeHour();
+        let targetLogo = LOGO_EVERYDAY;
+
+        if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
+            targetLogo = LOGO_ARCHIVE;
+        } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
+            targetLogo = LOGO_CERTIFIED;
         }
 
-        function checkAndApplyMarquee(wrapper, innerElement) {
-            innerElement.classList.remove('is-overflowing');
-            const clones = wrapper.querySelectorAll('.marquee-clone');
-            clones.forEach(c => c.remove());
+        if (showLogo.src !== targetLogo) {
+            showLogo.src = targetLogo;
+        }
+    }
 
-            setTimeout(() => {
-                if (innerElement.scrollWidth > wrapper.clientWidth) {
-                    innerElement.classList.add('is-overflowing');
-                    const clone = innerElement.cloneNode(true);
-                    clone.classList.remove('is-overflowing');
-                    clone.classList.add('marquee-clone');
-                    clone.style.marginLeft = '40px';
-                    wrapper.appendChild(clone);
-                }
-            }, 500);
+    function typeWriterText(targetElement, text, startDelay = 0) {
+        targetElement.innerHTML = '';
+        const chars = text.split('');
+        chars.forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'char-reveal';
+            span.innerHTML = char === ' ' ? '&nbsp;' : char;
+            span.style.animationDelay = `${startDelay + (index * 0.04)}s`;
+            targetElement.appendChild(span);
+        });
+    }
+
+    function checkAndApplyMarquee(wrapper, innerElement) {
+        innerElement.classList.remove('is-overflowing');
+        const clones = wrapper.querySelectorAll('.marquee-clone');
+        clones.forEach(c => c.remove());
+
+        setTimeout(() => {
+            if (innerElement.scrollWidth > wrapper.clientWidth) {
+                innerElement.classList.add('is-overflowing');
+                const clone = innerElement.cloneNode(true);
+                clone.classList.remove('is-overflowing');
+                clone.classList.add('marquee-clone');
+                clone.style.marginLeft = '40px';
+                wrapper.appendChild(clone);
+            }
+        }, 500);
+    }
+
+    function triggerShowScene() {
+        sceneTrack.classList.remove('slide-in');
+        sceneShow.classList.remove('slide-out');
+        typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
+    }
+
+    function triggerTrackScene(artist, title, coverUrl) {
+        trackCover.src = coverUrl || LOGO_ARCHIVE;
+        sceneShow.classList.add('slide-out');
+        sceneTrack.classList.add('slide-in');
+
+        artistContainer.innerText = artist;
+        titleContainer.innerText = title;
+
+        checkAndApplyMarquee(artistWrapper, artistContainer);
+        checkAndApplyMarquee(titleWrapper, titleContainer);
+    }
+
+    async function fetchSongData() {
+        try {
+            const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
+            if (!res.ok) return;
+            const data = await res.json();
+            let rawInfo = "Monkey Radio - Diretta Streaming";
+            if (data.icestats && data.icestats.source) {
+                const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+                const mount = sources.find(m => m.listenurl && m.listenurl.includes("/radio.mp3"));
+                if (mount && mount.title) rawInfo = mount.title;
+            }
+
+            if (rawInfo !== currentRawInfo) {
+                currentRawInfo = rawInfo;
+                await processNewSong(rawInfo);
+            }
+        } catch (err) {}
+    }
+
+    async function processNewSong(rawInfo) {
+        let artist = "Monkey Radio";
+        let title = rawInfo;
+        let coverUrl = null;
+
+        const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Diretta Streaming" || !rawInfo.includes(" - "));
+
+        if (!isGenericStream) {
+            const parts = rawInfo.split(" - ");
+            artist = parts[0].trim();
+            title = parts.slice(1).join(" - ").trim();
+        } else {
+            title = "Diretta Streaming";
         }
 
-        function triggerShowScene() {
-            sceneTrack.classList.remove('slide-in');
-            sceneShow.classList.remove('slide-out');
-            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
+        if (artist === currentArtist && title === currentTitle) {
+            return;
         }
 
-        function triggerTrackScene(artist, title, coverUrl) {
-            trackCover.src = coverUrl || LOGO_ARCHIVE;
-            sceneShow.classList.add('slide-out');
-            sceneTrack.classList.add('slide-in');
+        currentArtist = artist;
+        currentTitle = title;
 
-            artistContainer.innerText = artist;
-            titleContainer.innerText = title;
-
-            checkAndApplyMarquee(artistWrapper, artistContainer);
-            checkAndApplyMarquee(titleWrapper, titleContainer);
-        }
-
-        async function fetchSongData() {
+        if (!isGenericStream) {
             try {
-                const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
-                if (!res.ok) return;
-                const data = await res.json();
-                let rawInfo = "Monkey Radio - Diretta Streaming";
-                if (data.icestats && data.icestats.source) {
-                    const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
-                    const mount = sources.find(m => m.listenurl && m.listenurl.includes("/radio.mp3"));
-                    if (mount && mount.title) rawInfo = mount.title;
+                const itunesRes = await fetch(`[https://itunes.apple.com/search?term=$](https://itunes.apple.com/search?term=$){encodeURIComponent(rawInfo)}&entity=song&limit=1`);
+                const itunesData = await itunesRes.json();
+                if (itunesData.results && itunesData.results.length > 0) {
+                    coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
                 }
-
-                if (rawInfo !== currentRawInfo) {
-                    currentRawInfo = rawInfo;
-                    await processNewSong(rawInfo);
-                }
-            } catch (err) {}
+            } catch (e) {}
+        } else {
+            coverUrl = LOGO_ARCHIVE;
         }
 
-        async function processNewSong(rawInfo) {
-            let artist = "Monkey Radio";
-            let title = rawInfo;
-            let coverUrl = null;
+        triggerShowScene();
+        setTimeout(() => {
+            triggerTrackScene(artist, title, coverUrl);
+        }, 4000);
+    }
 
-            const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Diretta Streaming" || !rawInfo.includes(" - "));
+    updateShowLogo();
+    setInterval(updateShowLogo, 60000);
 
-            if (!isGenericStream) {
-                const parts = rawInfo.split(" - ");
-                artist = parts[0].trim();
-                title = parts.slice(1).join(" - ").trim();
-            } else {
-                title = "Diretta Streaming";
-            }
-
-            if (artist === currentArtist && title === currentTitle) {
-                return;
-            }
-
-            currentArtist = artist;
-            currentTitle = title;
-
-            if (!isGenericStream) {
-                try {
-                    const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawInfo)}&entity=song&limit=1`);
-                    const itunesData = await itunesRes.json();
-                    if (itunesData.results && itunesData.results.length > 0) {
-                        coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
-                    }
-                } catch (e) {}
-            } else {
-                coverUrl = LOGO_ARCHIVE;
-            }
-
-            triggerShowScene();
-            setTimeout(() => {
-                triggerTrackScene(artist, title, coverUrl);
-            }, 4000);
-        }
-
-        updateShowLogo();
-        setInterval(updateShowLogo, 60000);
-
-        fetchSongData();
-        setInterval(fetchSongData, 15000);
-    })();
-    </script>
-</body>
-</html>
+    fetchSongData();
+    setInterval(fetchSongData, 15000);
+})();
+</script>
