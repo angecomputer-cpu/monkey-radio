@@ -52,12 +52,12 @@
             overflow: hidden;
         }
 
-        /* PULSANTE FULLSCREEN AL CENTRO */
+        /* PULSANTE FULLSCREEN IN BASSO AL CENTRO */
         .fullscreen-btn {
             position: absolute;
-            top: 50%;
+            bottom: 30px;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             z-index: 999;
             background: rgba(20, 20, 20, 0.85);
             border: 2px solid #f8cd18;
@@ -77,7 +77,7 @@
         .fullscreen-btn:hover {
             background: #f8cd18;
             color: #0d0d0d;
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translateX(-50%) scale(1.1);
             box-shadow: 0 10px 30px rgba(248, 205, 24, 0.5);
         }
 
@@ -286,7 +286,7 @@
             animation: liveBlink 1.2s infinite ease-in-out;
         }
 
-        .artist-line-wrapper, .title-line-wrapper {
+        .artist-line-wrapper, .title-line-wrapper, .show-line-wrapper {
             width: 100%;
             overflow: hidden;
             position: relative;
@@ -296,10 +296,14 @@
         }
 
         .title-line-wrapper {
+            margin-bottom: 8px;
+        }
+
+        .show-line-wrapper {
             margin-bottom: 0;
         }
 
-        .track-artist, .track-title {
+        .track-artist, .track-title, .track-show {
             display: inline-block;
             white-space: nowrap;
         }
@@ -307,292 +311,4 @@
         .track-artist {
             font-size: 2vw;
             font-weight: 800;
-            color: #f8cd18;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.25;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-        }
-
-        .track-title {
-            font-size: 3.2vw;
-            font-weight: 900;
-            color: #ffffff;
-            line-height: 1.15;
-            letter-spacing: -0.5px;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-        }
-
-        .is-overflowing {
-            animation: marqueeScroll 12s linear infinite;
-        }
-
-        @keyframes marqueeScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        @media (max-width: 768px) {
-            .scene-show, .scene-track {
-                grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr;
-                padding: 4vh 4vw;
-            }
-            .show-logo-mask { width: 80vw; height: 35vh; }
-            .live-text-block { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .row-live-now { font-size: 4vw; gap: 2vw; }
-            .badge-live-flash { font-size: 3vw; padding: 2px 10px; }
-            .row-station-name { font-size: 5vw; }
-            .cover-wrapper { width: 32vh; height: 32vh; max-width: 70vw; }
-            .track-metadata { align-items: center; text-align: center; padding-left: 0; padding-right: 0; }
-            .artist-line-wrapper, .title-line-wrapper { text-align: center; }
-            .track-artist { font-size: 3.5vw; }
-            .track-title { font-size: 5vw; }
-            .badge-live-mini { font-size: 2.8vw; padding: 4px 12px; }
-            .fullscreen-btn { width: 50px; height: 50px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="monkey-stage">
-        <!-- VIDEO DI SFONDO DI ARCHIVE.ORG A TUTTO SCHERMO -->
-        <video class="bg-video" src="https://archive.org/download/back_screensaver/back_screensaver.mp4" preload="auto" loop muted playsinline autoplay></video>
-
-        <!-- FULLSCREEN REACTIVE BOX -->
-        <div class="screensaver-info">
-            <!-- SCENA 1: SHOW LOGO & NOW LIVE ON / MONKEY RADIO -->
-            <div id="sceneShow" class="scene-show">
-                <div class="show-logo-mask">
-                    <img id="showLogo" class="show-logo-img" src="" alt="Show Logo">
-                </div>
-                <div class="live-text-block">
-                    <div class="row-live-now">
-                        <div class="box-slide-mask">
-                            <span class="slide-from-left">NOW</span>
-                        </div>
-                        <span class="badge-live-flash">LIVE</span>
-                        <div class="box-slide-mask">
-                            <span class="slide-from-right">ON</span>
-                        </div>
-                    </div>
-                    <div class="row-station-name" id="stationNameContainer"></div>
-                </div>
-            </div>
-
-            <!-- SCENA 2: COVER & TRACK INFO -->
-            <div id="sceneTrack" class="scene-track">
-                <div class="cover-wrapper">
-                    <img id="trackCover" class="cover-img" src="" alt="Cover">
-                </div>
-                <div class="track-metadata">
-                    <span class="badge-live-mini">NOW ON AIR</span>
-                    <div class="artist-line-wrapper" id="artistWrapper">
-                        <div class="track-artist" id="artistContainer"></div>
-                    </div>
-                    <div class="title-line-wrapper" id="titleWrapper">
-                        <div class="track-title" id="titleContainer"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PULSANTE FULLSCREEN AL CENTRO -->
-        <button id="fullscreenBtn" class="fullscreen-btn" title="Attiva/Disattiva Schermo Intero">
-            <svg id="fsIcon" viewBox="0 0 24 24">
-                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-            </svg>
-        </button>
-    </div>
-
-    <script>
-    (function() {
-        const STATUS_JSON_URL = "https://a11.asurahosting.com:8610/status-json.xsl";
-        const DEFAULT_COVER = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_radio500_exzpanded.png";
-
-        const LOGO_EVERYDAY = "https://assets.nicepagecdn.com/966432fa/6080027/images/house_monkey_house.png";
-        const LOGO_CERTIFIED = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_house_cert.png";
-        const LOGO_ARCHIVE = "https://assets.nicepagecdn.com/966432fa/6080027/images/monkey_archive.png";
-
-        const sceneShow = document.getElementById('sceneShow');
-        const sceneTrack = document.getElementById('sceneTrack');
-        const showLogo = document.getElementById('showLogo');
-        const stationNameContainer = document.getElementById('stationNameContainer');
-        const trackCover = document.getElementById('trackCover');
-        
-        const artistWrapper = document.getElementById('artistWrapper');
-        const artistContainer = document.getElementById('artistContainer');
-        const titleWrapper = document.getElementById('titleWrapper');
-        const titleContainer = document.getElementById('titleContainer');
-
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const fsIcon = document.getElementById('fsIcon');
-
-        let currentRawInfo = "";
-        let currentArtist = "";
-        let currentTitle = "";
-
-        // GESTIONE FULLSCREEN / ESCI DA FULLSCREEN
-        const icons = {
-            enter: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
-            exit: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
-        };
-
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error("Errore nell'attivare il fullscreen:", err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fsIcon.innerHTML = `<path d="${icons.exit}"/>`;
-                fullscreenBtn.setAttribute('title', 'Esci da Schermo Intero');
-            } else {
-                fsIcon.innerHTML = `<path d="${icons.enter}"/>`;
-                fullscreenBtn.setAttribute('title', 'Attiva Schermo Intero');
-            }
-        });
-
-        function getRomeHour() {
-            return parseInt(new Intl.DateTimeFormat('it-IT', {
-                hour: 'numeric', hour12: false, timeZone: 'Europe/Rome'
-            }).format(new Date()));
-        }
-
-        function updateShowLogo() {
-            const hour = getRomeHour();
-            let targetLogo = LOGO_EVERYDAY;
-
-            if ((hour >= 0 && hour < 6) || (hour >= 12 && hour < 14)) {
-                targetLogo = LOGO_ARCHIVE;
-            } else if ((hour >= 6 && hour < 9) || (hour >= 18 && hour < 21)) {
-                targetLogo = LOGO_CERTIFIED;
-            }
-
-            if (showLogo.src !== targetLogo) {
-                showLogo.src = targetLogo;
-            }
-        }
-
-        function typeWriterText(targetElement, text, startDelay = 0) {
-            targetElement.innerHTML = '';
-            const chars = text.split('');
-            chars.forEach((char, index) => {
-                const span = document.createElement('span');
-                span.className = 'char-reveal';
-                span.innerHTML = char === ' ' ? '&nbsp;' : char;
-                span.style.animationDelay = `${startDelay + (index * 0.04)}s`;
-                targetElement.appendChild(span);
-            });
-        }
-
-        function checkAndApplyMarquee(wrapper, innerElement) {
-            innerElement.classList.remove('is-overflowing');
-            const clones = wrapper.querySelectorAll('.marquee-clone');
-            clones.forEach(c => c.remove());
-
-            setTimeout(() => {
-                if (innerElement.scrollWidth > wrapper.clientWidth) {
-                    innerElement.classList.add('is-overflowing');
-                    const clone = innerElement.cloneNode(true);
-                    clone.classList.remove('is-overflowing');
-                    clone.classList.add('marquee-clone');
-                    clone.style.marginLeft = '40px';
-                    wrapper.appendChild(clone);
-                }
-            }, 500);
-        }
-
-        function triggerShowScene() {
-            sceneTrack.classList.remove('slide-in');
-            sceneShow.classList.remove('slide-out');
-            typeWriterText(stationNameContainer, "MONKEY RADIO", 1.1);
-        }
-
-        function triggerTrackScene(artist, title, coverUrl) {
-            trackCover.src = coverUrl || LOGO_ARCHIVE;
-            sceneShow.classList.add('slide-out');
-            sceneTrack.classList.add('slide-in');
-
-            artistContainer.innerText = artist;
-            titleContainer.innerText = title;
-
-            checkAndApplyMarquee(artistWrapper, artistContainer);
-            checkAndApplyMarquee(titleWrapper, titleContainer);
-        }
-
-        async function fetchSongData() {
-            try {
-                const res = await fetch(STATUS_JSON_URL + "?_=" + Date.now());
-                if (!res.ok) return;
-                const data = await res.json();
-                let rawInfo = "Monkey Radio - Diretta Streaming";
-                if (data.icestats && data.icestats.source) {
-                    const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
-                    const mount = sources.find(m => m.listenurl && m.listenurl.includes("/radio.mp3"));
-                    if (mount && mount.title) rawInfo = mount.title;
-                }
-
-                if (rawInfo !== currentRawInfo) {
-                    currentRawInfo = rawInfo;
-                    await processNewSong(rawInfo);
-                }
-            } catch (err) {}
-        }
-
-        async function processNewSong(rawInfo) {
-            let artist = "Monkey Radio";
-            let title = rawInfo;
-            let coverUrl = null;
-
-            const isGenericStream = (!rawInfo || rawInfo === "Monkey Radio - Diretta Streaming" || !rawInfo.includes(" - "));
-
-            if (!isGenericStream) {
-                const parts = rawInfo.split(" - ");
-                artist = parts[0].trim();
-                title = parts.slice(1).join(" - ").trim();
-            } else {
-                title = "Diretta Streaming";
-            }
-
-            if (artist === currentArtist && title === currentTitle) {
-                return;
-            }
-
-            currentArtist = artist;
-            currentTitle = title;
-
-            if (!isGenericStream) {
-                try {
-                    const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawInfo)}&entity=song&limit=1`);
-                    const itunesData = await itunesRes.json();
-                    if (itunesData.results && itunesData.results.length > 0) {
-                        coverUrl = itunesData.results[0].artworkUrl100.replace('100x100bb', '512x512bb');
-                    }
-                } catch (e) {}
-            } else {
-                coverUrl = LOGO_ARCHIVE;
-            }
-
-            triggerShowScene();
-            setTimeout(() => {
-                triggerTrackScene(artist, title, coverUrl);
-            }, 4000);
-        }
-
-        updateShowLogo();
-        setInterval(updateShowLogo, 60000);
-
-        fetchSongData();
-        setInterval(fetchSongData, 15000);
-    })();
-    </script>
-</body>
-</html>
+            color: #f
